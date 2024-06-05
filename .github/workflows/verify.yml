@@ -1,0 +1,16 @@
+name: (📡) Verify
+
+on:
+  push:
+    branches-ignore:
+    - 'dependabot/**'
+  pull_request:
+    branches-ignore:
+    - 'main'
+  workflow_dispatch:
+
+jobs:
+  verify:
+    uses: sitepark/github-project-workflow/.github/workflows/composer-verify.yml@release/1.x
+    secrets:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
