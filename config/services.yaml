@@ -1,25 +1,36 @@
+parameters:
+  atoolo_runtime_check.worker_status_file: '%kernel.cache_dir%/schedule_check.json'
+  ## The period in minutes after which the worker status file is updated.
+  atoolo_runtime_check.worker_status_update_period: 10
+
 services:
 
   _defaults:
     autowire: true
     autoconfigure: true
+
   _instanceof:
     Symfony\Component\Console\Command\Command:
       tags: ['command']
 
-  Atoolo\Deployment\Service\StopWorkerOnRedeployListener:
-    arguments:
-      - '@logger'
+  Atoolo\Runtime\Check\Service\ProcessStatus: ~
 
-  Atoolo\Deployment\Service\Deployer:
+  Atoolo\Runtime\Check\Service\WorkerStatusFile:
     arguments:
-      - !tagged_iterator { tag: 'atoolo_deployment.deploy_executor' }
-      - '@logger'
+      - '%atoolo_runtime_check.worker_status_file%'
+      - '%atoolo_runtime_check.worker_status_update_period%'
 
-  Atoolo\Deployment\Console\Command\DeployCommand:
+  Atoolo\Runtime\Check\Service\WorkerCheckScheduler:
     arguments:
-      - '@Atoolo\Deployment\Service\Deployer'
+      - '@Atoolo\Runtime\Check\Service\WorkerStatusFile'
+      - '@Atoolo\Runtime\Check\Service\ProcessStatus'
 
-  Atoolo\Deployment\Controller\DeployController:
+  Atoolo\Runtime\Check\Console\Command\CheckCommand:
     arguments:
-      - '@Atoolo\Deployment\Service\Deployer'
+      - '%kernel.project_dir%/public/index.php'
+      - '@Atoolo\Runtime\Check\Service\WorkerStatusFile'
+      - '@Atoolo\Runtime\Check\Service\ProcessStatus'
+
+  Atoolo\Runtime\Check\Controller\CheckController:
+    arguments:
+      - '@Atoolo\Runtime\Check\Service\ProcessStatus'

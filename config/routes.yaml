@@ -1,3 +1,3 @@
-atoolo_deployment:
-  resource: '@AtooloDeploymentBundle/Controller/'
+atoolo_runtime_check:
+  resource: '@AtooloRuntimeCheckBundle/Controller/'
   type: attribute
