@@ -48,3 +48,4 @@ services:
   Atoolo\Runtime\Check\Controller\CheckController:
     arguments:
       - '@Atoolo\Runtime\Check\Service\ProcessStatus'
+      - '@Atoolo\Runtime\Check\Service\CliStatus'
