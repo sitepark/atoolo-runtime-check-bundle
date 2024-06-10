@@ -13,7 +13,21 @@ services:
     Symfony\Component\Console\Command\Command:
       tags: ['command']
 
+  Atoolo\Runtime\Check\Service\FastCgiStatusFactory:
+    arguments:
+        - [
+          '/var/run/php-fpm.sock',
+          '/var/run/php/php-fpm.sock',
+          '/var/run/php*.sock',
+          '/var/run/php/*.sock'
+        ]
+        - '%kernel.project_dir%/public/index.php'
+
   Atoolo\Runtime\Check\Service\ProcessStatus: ~
+
+  Atoolo\Runtime\Check\Service\CliStatus:
+    arguments:
+      - '%kernel.project_dir%/bin/console'
 
   Atoolo\Runtime\Check\Service\WorkerStatusFile:
     arguments:
@@ -27,7 +41,7 @@ services:
 
   Atoolo\Runtime\Check\Console\Command\CheckCommand:
     arguments:
-      - '%kernel.project_dir%/public/index.php'
+      - '@Atoolo\Runtime\Check\Service\FastCgiStatusFactory'
       - '@Atoolo\Runtime\Check\Service\WorkerStatusFile'
       - '@Atoolo\Runtime\Check\Service\ProcessStatus'
 

@@ -8,8 +8,14 @@ use InvalidArgumentException;
 
 class CheckStatus
 {
+    /**
+     * @var array<string, array<string>>
+     */
     private array $messages = [];
 
+    /**
+     * @var array<string,array<string,mixed>>
+     */
     private array $results = [];
 
     public function __construct(public bool $success)
@@ -35,6 +41,9 @@ class CheckStatus
         return $this;
     }
 
+    /**
+     * @param array<string,mixed> $result
+     */
     public function addResult(string $scope, array $result): self
     {
         if (isset($this->results[$scope])) {
@@ -44,11 +53,17 @@ class CheckStatus
         return $this;
     }
 
+    /**
+     * @return array<string,array<string,mixed>>
+     */
     public function getResults(): array
     {
         return $this->results;
     }
 
+    /**
+     * @return array<string,array<string>>
+     */
     public function getMessages(): array
     {
         return $this->messages;
@@ -67,6 +82,9 @@ class CheckStatus
         return $this;
     }
 
+    /**
+     * @return array<string,mixed>
+     */
     public function serialize(): array
     {
         return array_merge(
@@ -80,20 +98,27 @@ class CheckStatus
         );
     }
 
+    /**
+     * @param array<string,mixed> $data
+     */
     public static function deserialize(array $data): CheckStatus
     {
-        $status = new self($data['success']);
+        $success = is_bool($data['success']) ? $data['success'] : false;
+
+        $status = new self($success);
         foreach ($data as $name => $value) {
             if ($name === 'success') {
                 continue;
             }
             if ($name === 'messages') {
+                /** @var array<string,array<string>> $value */
                 foreach ($value as $scope => $message) {
                     foreach ($message as $msg) {
                         $status->addMessage($scope, $msg);
                     }
                 }
             } else {
+                /** @var array<string,array<mixed>> $value */
                 $status->addResult($name, $value);
             }
         }

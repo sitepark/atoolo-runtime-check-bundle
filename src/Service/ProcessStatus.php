@@ -4,34 +4,56 @@ declare(strict_types=1);
 
 namespace Atoolo\Runtime\Check\Service;
 
+/**
+ * @phpstan-type Config array{
+ *    ini: array<string>,
+ *    fpm: array{
+ *        configDirs: array<string>,
+ *        status: array<string>,
+ *    },
+ *    opcache: array<string>
+ *  }
+ */
 class ProcessStatus
 {
+    /**
+     * @var Config
+     */
     private readonly array $config;
 
+    /**
+     * @throws \JsonException
+     */
     public function __construct(
-        string $config = __DIR__ . '/phpStatus.json'
+        string $config = __DIR__ . '/processStatus.json',
+        private readonly string $sapi = PHP_SAPI,
+        private readonly Platform $platform = new Platform()
     ) {
-        $this->config = json_decode(
-            file_get_contents($config),
+        /** @var Config $data */
+        $data = json_decode(
+            file_get_contents($config) ?: '{}',
             true,
             512,
             JSON_THROW_ON_ERROR
         );
+        $this->config = $data;
     }
+
+    /**
+     * @return array<string,mixed>
+     */
     public function getStatus(): array
     {
         $status = [
-            'user' => (posix_getpwuid(posix_geteuid())
-                ?: ['name' => posix_geteuid()])['name'],
-            'group' => (posix_getgrgid(posix_getegid())
-                ?: ['name' => posix_getegid()])['name'],
+            'user' => $this->platform->getUser(),
+            'group' => $this->platform->getGroup(),
             'php' => [
-                'version' => PHP_VERSION,
+                'version' => $this->platform->getVersion(),
                 'ini' => $this->getIniSettings($this->config['ini'] ?? [])
             ]
         ];
 
-        if (PHP_SAPI === 'fpm-fcgi') {
+        if ($this->sapi === 'fpm-fcgi') {
             $fpm = [];
             $fpm['config'] = $this->getFpmConfig(
                 $this->config['fpm']['configDirs'] ?? []
@@ -48,20 +70,29 @@ class ProcessStatus
         return $status;
     }
 
+    /**
+     * @param array<string> $names
+     * @return array<string, mixed>
+     */
     private function getIniSettings(array $names): array
     {
         $result = [
-            'file' => php_ini_loaded_file()
+            'file' => $this->platform->getPhpIniLoadedFile()
         ];
         foreach ($names as $name) {
-            $result[$name] = ini_get($name);
+            $result[$name] = $this->platform->getIni($name);
         }
         return $result;
     }
 
+    /**
+     * @param array<string> $names
+     * @return array<string, mixed>
+     */
     private function getFpmPoolStatus(array $names): array
     {
-        $status = fpm_get_status();
+        $status = $this->platform->getFpmPoolStatus();
+        /** @var array<string, mixed> $result */
         $result = [];
         foreach ($names as $name) {
             $result[$name] = $status[$name];
@@ -69,9 +100,40 @@ class ProcessStatus
         return $result;
     }
 
+    /**
+     * @param array<string> $configDirs
+     * @return array<string,mixed>
+     */
     private function getFpmConfig(array $configDirs): array
     {
-        $version = explode('.', PHP_VERSION);
+        $fpmConfigFile = $this->getFpmConfigFile($configDirs);
+        if ($fpmConfigFile === null) {
+            return [];
+        }
+
+        $globalConfig = parse_ini_file($fpmConfigFile, true) ?: [];
+
+        $configs = [];
+        if (isset($globalConfig['global']['include'])) {
+            $include = $globalConfig['global']['include'];
+            if ($include[0] !== '/') {
+                $include = dirname($fpmConfigFile) . '/../' . $include;
+            }
+
+            foreach (glob($include) ?: [] as $file) {
+                $configs[] = parse_ini_file($file, true) ?: [];
+            }
+        }
+
+        return array_merge_recursive($globalConfig, ...$configs);
+    }
+
+    /**
+     * @param array<string> $configDirs
+     */
+    private function getFpmConfigFile(array $configDirs): ?string
+    {
+        $version = explode('.', $this->platform->getVersion());
         foreach ($configDirs as $configDir) {
             $configDir = str_replace(
                 [
@@ -88,33 +150,20 @@ class ProcessStatus
             );
             $iniFilePath = $configDir . '/php-fpm.conf';
             if (file_exists($iniFilePath)) {
-                break;
+                return $iniFilePath;
             }
         }
 
-        if ($iniFilePath === null || !file_exists($iniFilePath)) {
-            return [];
-        }
-
-        $globalConfig = parse_ini_file($iniFilePath, true);
-
-        $include = $globalConfig['global']['include'] ?? '';
-        if ($include[0] !== '/') {
-            $include = dirname($iniFilePath) . '/../' . $include;
-        }
-
-        $configs = [];
-        foreach (glob($include) as $file) {
-            $c = parse_ini_file($file, true);
-            $configs[] = parse_ini_file($file, true);
-        }
-
-        return array_merge_recursive($globalConfig, ...$configs);
+        return null;
     }
 
+    /**
+     * @param array<string> $names
+     * @return array<string, mixed>
+     */
     private function getOpcacheStatus(array $names): array
     {
-        $status = opcache_get_status();
+        $status = $this->platform->getOpcacheGetStatus();
         $result = [];
         foreach ($names as $name) {
             $result[$name] = $status[$name];

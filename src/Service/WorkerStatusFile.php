@@ -6,13 +6,13 @@ namespace Atoolo\Runtime\Check\Service;
 
 use DateTime;
 use JsonException;
-use Symfony\Contracts\Service\ServiceProviderInterface;
 
 class WorkerStatusFile
 {
     public function __construct(
         private readonly string $workerStatusFile,
         public readonly int $updatePeriodInMinutes,
+        private readonly Platform $platform = new Platform()
     ) {
     }
 
@@ -28,17 +28,20 @@ class WorkerStatusFile
 
         $toleranceInMinutes = $this->updatePeriodInMinutes / 2;
 
+        /** @var array<string,mixed> $result */
         $result = json_decode(
-            file_get_contents($this->workerStatusFile),
+            file_get_contents($this->workerStatusFile) ?: '{}',
             true,
             512,
             JSON_THROW_ON_ERROR
         );
 
         $allowedTime =
-            time() -
-            (($this->updatePeriodInMinutes - $toleranceInMinutes) * 60);
-        $lastRun = strtotime($result['last-run']);
+            $this->platform->time() -
+            (($this->updatePeriodInMinutes + $toleranceInMinutes) * 60);
+        $lastRun = is_string($result['last-run'])
+            ? strtotime($result['last-run'])
+            : 0;
 
         if ($lastRun < $allowedTime) {
             return CheckStatus::createFailure()
@@ -60,9 +63,10 @@ class WorkerStatusFile
      */
     public function write(ProcessStatus $phpStatus): void
     {
-        $formatter = new DateTime();
+        $now = new DateTime();
+        $now->setTimestamp($this->platform->time()); // testable
         $results = $phpStatus->getStatus();
-        $results['last-run'] = $formatter->format('d.m.Y H:i:s');
+        $results['last-run'] = $now->format('d.m.Y H:i:s');
         file_put_contents(
             $this->workerStatusFile,
             json_encode($results, JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR)

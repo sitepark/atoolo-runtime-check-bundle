@@ -21,7 +21,7 @@ class WorkerCheckScheduler implements ScheduleProviderInterface
 
     public function __construct(
         private readonly WorkerStatusFile $workerStatusFile,
-        private readonly ProcessStatus $phpStatus,
+        private readonly ProcessStatus $processStatus,
         private readonly LockFactory $lockFactory = new LockFactory(
             new SemaphoreStore()
         ),
@@ -46,6 +46,6 @@ class WorkerCheckScheduler implements ScheduleProviderInterface
      */
     public function __invoke(WorkerCheckEvent $message): void
     {
-        $this->workerStatusFile->write($this->phpStatus);
+        $this->workerStatusFile->write($this->processStatus);
     }
 }

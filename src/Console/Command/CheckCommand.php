@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace Atoolo\Runtime\Check\Console\Command;
 
+use Atoolo\Runtime\Check\Console\Command\Io\TypifiedInput;
 use Atoolo\Runtime\Check\Service\CheckStatus;
-use Atoolo\Runtime\Check\Service\FastCGIStatus;
+use Atoolo\Runtime\Check\Service\FastCgiStatusFactory;
 use Atoolo\Runtime\Check\Service\ProcessStatus;
 use Atoolo\Runtime\Check\Service\WorkerStatusFile;
 use JsonException;
@@ -23,9 +24,9 @@ use Symfony\Component\Console\Output\OutputInterface;
 final class CheckCommand extends Command
 {
     public function __construct(
-        private readonly string $frontControllerPath,
+        private readonly FastCgiStatusFactory $fastCgiStatusFactory,
         private readonly WorkerStatusFile $workerStatusFile,
-        private readonly ProcessStatus $phpStatus
+        private readonly ProcessStatus $processStatus
     ) {
         parent::__construct();
     }
@@ -71,36 +72,40 @@ final class CheckCommand extends Command
         OutputInterface $output
     ): int {
 
+        $typedInput = new TypifiedInput($input);
+
         $status = CheckStatus::createSuccess();
         $status->addResult(PHP_SAPI, array_merge(
             [
                 'script' => $_SERVER['SCRIPT_FILENAME'] ?? 'n/a',
             ],
-            $this->phpStatus->getStatus()
+            $this->processStatus->getStatus()
         ));
 
         $status->apply($this->workerStatusFile->read());
 
-        if (!$input->getOption('fpm-skip')) {
-            $fastCgi = new FastCGIStatus($input->getOption('fpm-socket'));
+        if (!$typedInput->getBoolOption('fpm-skip')) {
+            $fastCgi = $this->fastCgiStatusFactory->create(
+                $typedInput->getStringOption('fpm-socket')
+            );
             $content = http_build_query(['cli-skip' => true]);
-            $status->apply($fastCgi->request(
-                $this->frontControllerPath,
-                $content
-            ));
+            $status->apply($fastCgi->request($content));
         }
         $this->outputResults(
             $output,
             $status,
-            $input->getOption('json')
+            $typedInput->getBoolOption('json')
         );
 
         return $status->success
-            || $input->getOption('json')
+            || $typedInput->getBoolOption('json')
                 ? Command::SUCCESS
                 : Command::FAILURE;
     }
 
+    /**
+     * @throws JsonException
+     */
     private function outputResults(
         OutputInterface $output,
         CheckStatus $status,
@@ -108,11 +113,17 @@ final class CheckCommand extends Command
     ): void {
         if ($json) {
             $output->writeln(
-                json_encode($status->serialize(), JSON_PRETTY_PRINT)
+                json_encode(
+                    $status->serialize(),
+                    JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT
+                )
             );
         } else {
             foreach ($status->getResults() as $scope => $value) {
-                $value = json_encode($value, JSON_PRETTY_PRINT);
+                $value = json_encode(
+                    $value,
+                    JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT
+                );
                 $output->writeln('<info>'  . $scope . '</info>');
                 $output->writeln($value);
                 $output->writeln('');
