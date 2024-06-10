@@ -10,7 +10,7 @@ use Symfony\Component\Process\Process;
 class CliStatus
 {
     public function __construct(
-        private string $consoleBinPath
+        private readonly string $consoleBinPath
     ) {
     }
 
