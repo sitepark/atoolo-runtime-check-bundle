@@ -145,5 +145,4 @@ class CheckStatusTest extends TestCase
             'Status was not deserialized correctly'
         );
     }
-
 }
