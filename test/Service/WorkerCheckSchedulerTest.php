@@ -29,7 +29,7 @@ class WorkerCheckSchedulerTest extends TestCase
         $schedule = $workerCheckScheduler->getSchedule();
 
         $this->assertEquals(
-            1,
+            2,
             count($schedule->getRecurringMessages())
         );
     }

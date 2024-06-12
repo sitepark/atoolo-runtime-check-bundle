@@ -32,8 +32,12 @@ class WorkerCheckScheduler implements ScheduleProviderInterface
     {
         return $this->schedule ??= (new Schedule())
             ->add(
+                RecurringMessage::trigger(
+                    new OneTimeTrigger(),
+                    new WorkerCheckEvent()
+                ),
                 RecurringMessage::every(
-                    $this->workerStatusFile->updatePeriodInMinutes . ' seconds',
+                    $this->workerStatusFile->updatePeriodInMinutes . ' minutes',
                     new WorkerCheckEvent()
                 ),
             )->lock($this->lockFactory->createLock(
