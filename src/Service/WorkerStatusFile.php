@@ -45,7 +45,7 @@ class WorkerStatusFile
 
         if ($lastRun < $allowedTime) {
             return CheckStatus::createFailure()
-                ->addResult('worker', $result)
+                ->addReport('worker', $result)
                 ->addMessage(
                     'worker',
                     'The worker did not run in the last '
@@ -55,7 +55,7 @@ class WorkerStatusFile
         }
 
         return CheckStatus::createSuccess()
-            ->addResult('worker', $result);
+            ->addReport('worker', $result);
     }
 
     /**

@@ -52,7 +52,7 @@ class CheckControllerTest extends TestCase
         ]);
 
         $cliStatus = CheckStatus::createSuccess();
-        $cliStatus->addResult('cli', [
+        $cliStatus->addReport('cli', [
             'user' => 'test'
         ]);
         $this->cliStatus->method('execute')->willReturn(
@@ -70,15 +70,17 @@ class CheckControllerTest extends TestCase
         $this->assertEquals(
             [
                 'success' => true,
-                'cli' => [
-                    'user' => 'test'
+                'reports' => [
+                    'cli' => [
+                        'user' => 'test'
+                    ],
+                    'fpm-fcgi' => [
+                        'host' => 'www.example.com',
+                        'user' => 'test'
+                    ]
                 ],
                 'messages' => [
                 ],
-                'fpm-fcgi' => [
-                    'host' => 'www.example.com',
-                    'user' => 'test'
-                ]
             ],
             $json,
             'Unexpected response content'

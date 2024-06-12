@@ -22,7 +22,7 @@ class CliStatus
         $process = new Process([
             $this->consoleBinPath,
             'runtime:check',
-            '--fpm-skip',
+            '--skip', 'fpm',
             '--json'
         ]);
         try {

@@ -31,6 +31,24 @@ class TypifiedInput
         return $value;
     }
 
+    /**
+     * @return array<string>
+     */
+    public function getArrayOption(string $name): array
+    {
+        $value = $this->input->getOption($name);
+        if ($value === null) {
+            return [];
+        }
+        if (!is_array($value)) {
+            throw new InvalidArgumentException(
+                'option ' . $name . ' must be a array: ' . $value
+            );
+        }
+        return $value;
+    }
+
+
     public function getBoolOption(string $name): bool
     {
         $value = $this->input->getOption($name);

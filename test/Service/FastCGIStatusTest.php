@@ -40,7 +40,14 @@ class FastCGIStatusTest extends TestCase
     public function testRequest(): void
     {
         $this->response->method('getBody')
-            ->willReturn('{"success":true,"scope":{"user":"test"}}');
+            ->willReturn(json_encode([
+                'success' => true,
+                'reports' => [
+                    'scope' => [
+                        'a' => 'b'
+                    ]
+                ]
+            ], JSON_THROW_ON_ERROR));
         $this->client->method('sendRequest')
             ->willReturn($this->response);
 
@@ -48,8 +55,8 @@ class FastCGIStatusTest extends TestCase
         $status = $this->fastCGIStatus->request('');
 
         $expected = CheckStatus::createSuccess();
-        $expected->addResult('scope', [
-            'user' => 'test'
+        $expected->addReport('scope', [
+            'a' => 'b'
         ]);
 
         $this->assertEquals(

@@ -19,7 +19,8 @@ class FastCGIStatus
         private readonly string $socket,
         private readonly Client $client,
         private readonly ConfiguresSocketConnection $connection,
-        private readonly string $frontControllerPath
+        private readonly string $frontControllerPath,
+        //private readonly JWTTokenManagerInterface $jwtManager
     ) {
     }
 
@@ -44,7 +45,8 @@ class FastCGIStatus
     public function request(string $content): CheckStatus
     {
         $request = new PostRequest($this->frontControllerPath, $content);
-        $request->setRequestUri('/runtime-check');
+        $request->setRequestUri('/api/runtime-check');
+        $request->setRemoteAddress('127.0.0.1');
 
         try {
             $res =  $this->client->sendRequest(

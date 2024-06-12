@@ -39,12 +39,12 @@ class CheckStatusTest extends TestCase
     public function testAddResult(): void
     {
         $status = new CheckStatus(true);
-        $status->addResult('scope', ['result']);
+        $status->addReport('scope', ['result']);
         self::assertSame(
             [
                 'scope' => ['result']
             ],
-            $status->getResults(),
+            $status->getReports(),
             'Result was not added correctly'
         );
     }
@@ -52,21 +52,21 @@ class CheckStatusTest extends TestCase
     public function testAddResultWithScopeAlreadyExists(): void
     {
         $status = new CheckStatus(true);
-        $status->addResult('scope', ['result']);
+        $status->addReport('scope', ['result']);
 
         $this->expectExceptionMessage('Scope scope already exists');
-        $status->addResult('scope', ['result']);
+        $status->addReport('scope', ['result']);
     }
 
     public function testApply(): void
     {
         $status = new CheckStatus(true);
         $toApply = CheckStatus::createFailure();
-        $toApply->addResult('scope', ['result']);
+        $toApply->addReport('scope', ['result']);
         $status->apply($toApply);
 
         $expected = new CheckStatus(false);
-        $expected->addResult('scope', ['result']);
+        $expected->addReport('scope', ['result']);
         self::assertEquals(
             $expected,
             $status,
@@ -78,12 +78,16 @@ class CheckStatusTest extends TestCase
     {
         $status = new CheckStatus(true);
         $status->addMessage('scope', 'message');
-        $status->addResult('scope', ['result']);
+        $status->addReport('scope', ['a' => 'b']);
         $serialized = $status->serialize();
         self::assertSame(
             [
                 'success' => true,
-                'scope' => ['result'],
+                'reports' => [
+                    'scope' => [
+                        'a' => 'b'
+                    ],
+                ],
                 'messages' => [
                     'scope' => ['message']
                 ],
@@ -97,7 +101,11 @@ class CheckStatusTest extends TestCase
     {
         $serialized = [
             'success' => true,
-            'scope' => ['result'],
+            'reports' => [
+                'scope' => [
+                    'a' => 'b'
+                ],
+            ],
             'messages' => [
                 'scope' => ['message']
             ],
@@ -105,7 +113,7 @@ class CheckStatusTest extends TestCase
         $status = CheckStatus::deserialize($serialized);
         $expected = new CheckStatus(true);
         $expected->addMessage('scope', 'message');
-        $expected->addResult('scope', ['result']);
+        $expected->addReport('scope', ['a' => 'b']);
 
         self::assertEquals(
             $expected,
@@ -113,4 +121,29 @@ class CheckStatusTest extends TestCase
             'Status was not deserialized correctly'
         );
     }
+
+    /**
+     * @throws \JsonException
+     */
+    public function testWithUnknownJson(): void
+    {
+        $serialized = [
+            'code' => 401,
+            'message' => "JWT Token not found"
+        ];
+        $status = CheckStatus::deserialize($serialized);
+
+        $expected = new CheckStatus(false);
+        $expected->addMessage(
+            'deserialize',
+            json_encode($serialized, JSON_THROW_ON_ERROR)
+        );
+
+        self::assertEquals(
+            $expected,
+            $status,
+            'Status was not deserialized correctly'
+        );
+    }
+
 }

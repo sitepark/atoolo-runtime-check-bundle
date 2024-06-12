@@ -119,9 +119,11 @@ EOF,
             <<<EOF
 {
     "success": true,
-    "cli": {
-        "script": "\/test\/bin\/console",
-        "user": "user"
+    "reports": {
+        "cli": {
+            "script": "\/test\/bin\/console",
+            "user": "user"
+        }
     },
     "messages": []
 }

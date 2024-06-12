@@ -59,7 +59,7 @@ class WorkerStatusFileTest extends TestCase
         $status = $statusFile->read();
 
         $expected = CheckStatus::createSuccess();
-        $expected->addResult('worker', [
+        $expected->addReport('worker', [
             'last-run' => '10.06.2024 13:16:00'
         ]);
 
@@ -105,7 +105,7 @@ class WorkerStatusFileTest extends TestCase
         $status = $statusFile->read();
 
         $expected = CheckStatus::createFailure();
-        $expected->addResult('worker', [
+        $expected->addReport('worker', [
             'last-run' => '10.06.2024 13:16:00'
         ]);
         $expected->addMessage(
@@ -138,7 +138,7 @@ class WorkerStatusFileTest extends TestCase
         $status = $statusFile->read();
 
         $expected = CheckStatus::createFailure();
-        $expected->addResult('worker', [
+        $expected->addReport('worker', [
             'last-run' => 123
         ]);
         $expected->addMessage(

@@ -16,7 +16,7 @@ class CheckStatus
     /**
      * @var array<string,array<string,mixed>>
      */
-    private array $results = [];
+    private array $reports = [];
 
     public function __construct(public bool $success)
     {
@@ -44,21 +44,21 @@ class CheckStatus
     /**
      * @param array<string,mixed> $result
      */
-    public function addResult(string $scope, array $result): self
+    public function addReport(string $scope, array $result): self
     {
-        if (isset($this->results[$scope])) {
+        if (isset($this->reports[$scope])) {
             throw new InvalidArgumentException("Scope $scope already exists");
         }
-        $this->results[$scope] = $result;
+        $this->reports[$scope] = $result;
         return $this;
     }
 
     /**
      * @return array<string,array<string,mixed>>
      */
-    public function getResults(): array
+    public function getReports(): array
     {
-        return $this->results;
+        return $this->reports;
     }
 
     /**
@@ -76,8 +76,8 @@ class CheckStatus
             $this->messages,
             $status->messages
         );
-        foreach ($status->results as $scope => $result) {
-            $this->addResult($scope, $result);
+        foreach ($status->reports as $scope => $result) {
+            $this->addReport($scope, $result);
         }
         return $this;
     }
@@ -87,41 +87,32 @@ class CheckStatus
      */
     public function serialize(): array
     {
-        return array_merge(
-            [
-                'success' => $this->success
-            ],
-            $this->results,
-            [
-                'messages' => $this->messages,
-            ]
-        );
+        return [
+            'success' => $this->success,
+            'reports' => $this->reports,
+            'messages' => $this->messages,
+        ];
     }
 
     /**
      * @param array<string,mixed> $data
+     * @throws \JsonException
      */
     public static function deserialize(array $data): CheckStatus
     {
-        $success = is_bool($data['success']) ? $data['success'] : false;
+        if (!isset($data['success'])) {
+            $data = [
+                'success' => false,
+                'messages' => [
+                    'deserialize' => [json_encode($data, JSON_THROW_ON_ERROR)]
+                ]
+            ];
+        }
+        $success = is_bool($data['success']) && $data['success'];
 
         $status = new self($success);
-        foreach ($data as $name => $value) {
-            if ($name === 'success') {
-                continue;
-            }
-            if ($name === 'messages') {
-                /** @var array<string,array<string>> $value */
-                foreach ($value as $scope => $message) {
-                    foreach ($message as $msg) {
-                        $status->addMessage($scope, $msg);
-                    }
-                }
-            } else {
-                /** @var array<string,array<mixed>> $value */
-                $status->addResult($name, $value);
-            }
-        }
+        $status->reports = $data['reports'] ?? [];
+        $status->messages = $data['messages'] ?? [];
         return $status;
     }
 }

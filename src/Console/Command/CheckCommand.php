@@ -35,17 +35,12 @@ final class CheckCommand extends Command
     {
         $this
             ->setHelp('Command to performs a check of the runtime environment')
-            ->addArgument(
-                'skip-fpm',
-                InputArgument::OPTIONAL,
-                'Skip check for fpm.'
-            )
             ->addOption(
-                'fpm-skip',
+                'skip',
                 null,
-                InputOption::VALUE_NEGATABLE,
-                'Skip check for fpm.',
-                false
+                InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY,
+                'Skip check for different areas. E.g. for "fpm" .',
+                []
             )
             ->addOption(
                 'fpm-socket',
@@ -75,7 +70,7 @@ final class CheckCommand extends Command
         $typedInput = new TypifiedInput($input);
 
         $status = CheckStatus::createSuccess();
-        $status->addResult(PHP_SAPI, array_merge(
+        $status->addReport(PHP_SAPI, array_merge(
             [
                 'script' => $_SERVER['SCRIPT_FILENAME'] ?? 'n/a',
             ],
@@ -84,11 +79,14 @@ final class CheckCommand extends Command
 
         $status->apply($this->workerStatusFile->read());
 
-        if (!$typedInput->getBoolOption('fpm-skip')) {
+        $skip = $typedInput->getArrayOption('skip');
+
+        if (!in_array('fpm', $skip, true)) {
             $fastCgi = $this->fastCgiStatusFactory->create(
                 $typedInput->getStringOption('fpm-socket')
             );
-            $content = http_build_query(['cli-skip' => true]);
+            $skip[] = 'cli';
+            $content = http_build_query(['skip' => $skip]);
             $status->apply($fastCgi->request($content));
         }
         $this->outputResults(
@@ -119,7 +117,7 @@ final class CheckCommand extends Command
                 )
             );
         } else {
-            foreach ($status->getResults() as $scope => $value) {
+            foreach ($status->getReports() as $scope => $value) {
                 $value = json_encode(
                     $value,
                     JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT

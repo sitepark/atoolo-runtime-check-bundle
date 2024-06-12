@@ -101,4 +101,57 @@ class TypifiedInputTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $input->getBoolOption('a');
     }
+
+    /**
+     * @throws Exception
+     */
+    public function testGetArrayOption(): void
+    {
+        $symfonyInput = $this->createStub(InputInterface::class);
+        $symfonyInput
+            ->method('getOption')
+            ->willReturn(['abc']);
+
+        $input = new TypifiedInput($symfonyInput);
+
+        $this->assertEquals(
+            ['abc'],
+            $input->getArrayOption('a'),
+            'unexpected option value'
+        );
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testGetArrayOptionMissingValue(): void
+    {
+        $symfonyInput = $this->createStub(InputInterface::class);
+        $symfonyInput
+            ->method('getOption')
+            ->willReturn(null);
+
+        $input = new TypifiedInput($symfonyInput);
+
+        $this->assertEquals(
+            [],
+            $input->getArrayOption('a'),
+            'unexpected option value'
+        );
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testGetArrayOptionInvaludValue(): void
+    {
+        $symfonyInput = $this->createStub(InputInterface::class);
+        $symfonyInput
+            ->method('getOption')
+            ->willReturn('abc');
+
+        $input = new TypifiedInput($symfonyInput);
+        $this->expectException(InvalidArgumentException::class);
+        $input->getArrayOption('a');
+    }
 }
