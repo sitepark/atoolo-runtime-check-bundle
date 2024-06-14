@@ -5,14 +5,12 @@ declare(strict_types=1);
 namespace Atoolo\Runtime\Check\Console\Command;
 
 use Atoolo\Runtime\Check\Console\Command\Io\TypifiedInput;
-use Atoolo\Runtime\Check\Service\CheckStatus;
-use Atoolo\Runtime\Check\Service\FastCgiStatusFactory;
-use Atoolo\Runtime\Check\Service\ProcessStatus;
-use Atoolo\Runtime\Check\Service\WorkerStatusFile;
+use Atoolo\Runtime\Check\Service\Cli\RuntimeCheck;
+use Atoolo\Runtime\Check\Service\RuntimeStatus;
+use Atoolo\Runtime\Check\Service\RuntimeType;
 use JsonException;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -24,9 +22,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 final class CheckCommand extends Command
 {
     public function __construct(
-        private readonly FastCgiStatusFactory $fastCgiStatusFactory,
-        private readonly WorkerStatusFile $workerStatusFile,
-        private readonly ProcessStatus $processStatus
+        private readonly RuntimeCheck $runtimeCheck
     ) {
         parent::__construct();
     }
@@ -50,6 +46,13 @@ final class CheckCommand extends Command
                 . '/var/run/php/php8.3-fpm.sock'
             )
             ->addOption(
+                'fail-on-error',
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'returns the exit code 1 if an error occurs',
+                true
+            )
+            ->addOption(
                 'json',
                 null,
                 InputOption::VALUE_NEGATABLE,
@@ -69,34 +72,19 @@ final class CheckCommand extends Command
 
         $typedInput = new TypifiedInput($input);
 
-        $status = CheckStatus::createSuccess();
-        $status->addReport(PHP_SAPI, array_merge(
-            [
-                'script' => $_SERVER['SCRIPT_FILENAME'] ?? 'n/a',
-            ],
-            $this->processStatus->getStatus()
-        ));
+        $runtimeStatus = $this->runtimeCheck->execute(
+            $typedInput->getArrayOption('skip'),
+            $typedInput->getStringOption('fpm-socket')
+        );
 
-        $status->apply($this->workerStatusFile->read());
-
-        $skip = $typedInput->getArrayOption('skip');
-
-        if (!in_array('fpm', $skip, true)) {
-            $fastCgi = $this->fastCgiStatusFactory->create(
-                $typedInput->getStringOption('fpm-socket')
-            );
-            $skip[] = 'cli';
-            $content = http_build_query(['skip' => $skip]);
-            $status->apply($fastCgi->request($content));
-        }
         $this->outputResults(
             $output,
-            $status,
+            $runtimeStatus,
             $typedInput->getBoolOption('json')
         );
 
-        return $status->success
-            || $typedInput->getBoolOption('json')
+        $failOnError = $typedInput->getBoolOption('fail-on-error');
+        return $runtimeStatus->isSuccess() || !$failOnError
                 ? Command::SUCCESS
                 : Command::FAILURE;
     }
@@ -106,36 +94,49 @@ final class CheckCommand extends Command
      */
     private function outputResults(
         OutputInterface $output,
-        CheckStatus $status,
+        RuntimeStatus $runtimeStatus,
         bool $json
     ): void {
         if ($json) {
             $output->writeln(
                 json_encode(
-                    $status->serialize(),
-                    JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT
+                    $runtimeStatus->serialize(),
+                    JSON_THROW_ON_ERROR
+                    | JSON_PRETTY_PRINT
+                    | JSON_UNESCAPED_SLASHES
                 )
             );
         } else {
-            foreach ($status->getReports() as $scope => $value) {
-                $value = json_encode(
-                    $value,
-                    JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT
-                );
-                $output->writeln('<info>'  . $scope . '</info>');
-                $output->writeln($value);
-                $output->writeln('');
+            foreach (RuntimeType::cases() as $type) {
+                $status = $runtimeStatus->getStatus($type);
+                if ($status === null) {
+                    continue;
+                }
+                foreach ($status->getReports() as $scope => $value) {
+                    $value = json_encode(
+                        $value,
+                        JSON_THROW_ON_ERROR
+                        | JSON_PRETTY_PRINT
+                        | JSON_UNESCAPED_SLASHES
+                    );
+                    $output->writeln(
+                        '<info>'
+                        . $type->value
+                        . '/'
+                        . $scope
+                        . '</info>'
+                    );
+                    $output->writeln($value);
+                    $output->writeln('');
+                }
             }
-            if ($status->success) {
+
+            if ($runtimeStatus->isSuccess()) {
                 $output->writeln('<info>Success</info>');
             } else {
                 $output->writeln('<error>Failure</error>');
-                foreach ($status->getMessages() as $scope => $messages) {
-                    foreach ($messages as $message) {
-                        $output->writeln(
-                            '<error>' . $scope . ': ' . $message . '</error>'
-                        );
-                    }
+                foreach ($runtimeStatus->getMessages() as $scope => $message) {
+                    $output->writeln('<error>' . $message . '</error>');
                 }
             }
         }

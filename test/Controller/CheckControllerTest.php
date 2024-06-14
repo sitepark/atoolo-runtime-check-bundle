@@ -5,58 +5,44 @@ declare(strict_types=1);
 namespace Atoolo\Runtime\Check\Test\Controller;
 
 use Atoolo\Runtime\Check\Controller\CheckController;
+use Atoolo\Runtime\Check\Service\Checker\ProcessStatus;
 use Atoolo\Runtime\Check\Service\CheckStatus;
-use Atoolo\Runtime\Check\Service\CliStatus;
-use Atoolo\Runtime\Check\Service\ProcessStatus;
+use Atoolo\Runtime\Check\Service\FpmFcgi\CliStatus;
+use Atoolo\Runtime\Check\Service\FpmFcgi\RuntimeCheck;
+use Atoolo\Runtime\Check\Service\RuntimeStatus;
+use Atoolo\Runtime\Check\Service\RuntimeType;
+use JsonException;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Psr\Container\ContainerInterface;
-use Symfony\Component\DependencyInjection\Container;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 
 #[CoversClass(CheckController::class)]
 class CheckControllerTest extends TestCase
 {
-    private ProcessStatus $processStatus;
+    private RuntimeCheck&MockObject $runtimeCheck;
 
-    private CliStatus $cliStatus;
-
-    private string $originServerName;
-
+    /**
+     * @throws Exception
+     */
     public function setUp(): void
     {
-        $this->originServerName = $_SERVER['SERVER_NAME'] ?? '';
-        $_SERVER['SERVER_NAME'] = 'www.example.com';
-
-        $this->processStatus = $this->createStub(ProcessStatus::class);
-        $this->cliStatus = $this->createStub(CliStatus::class);
-        $this->controller = new CheckController(
-            $this->processStatus,
-            $this->cliStatus,
-            'fpm-fcgi'
-        );
-    }
-
-    public function tearDown(): void
-    {
-        $_SERVER['SERVER_NAME'] = $this->originServerName;
+        $this->runtimeCheck = $this->createMock(RuntimeCheck::class);
+        $this->controller = new CheckController($this->runtimeCheck);
     }
 
     public function testCheck(): void
     {
-        $this->processStatus->method('getStatus')->willReturn([
-            'user' => 'test'
+        $checkStatus = CheckStatus::createSuccess();
+        $checkStatus->addReport('test', [
+            'a' => 'b'
         ]);
+        $runtimeStatus = new RuntimeStatus();
+        $runtimeStatus->addStatus(RuntimeType::CLI, $checkStatus);
 
-        $cliStatus = CheckStatus::createSuccess();
-        $cliStatus->addReport('cli', [
-            'user' => 'test'
-        ]);
-        $this->cliStatus->method('execute')->willReturn(
-            $cliStatus
+        $this->runtimeCheck->method('execute')->willReturn(
+            $runtimeStatus
         );
 
         $request = $this->createMock(Request::class);
@@ -70,20 +56,83 @@ class CheckControllerTest extends TestCase
         $this->assertEquals(
             [
                 'success' => true,
-                'reports' => [
-                    'cli' => [
-                        'user' => 'test'
+                'cli' => [
+                    'reports' => [
+                        'test' => [
+                            'a' => 'b'
+                        ]
                     ],
-                    'fpm-fcgi' => [
-                        'host' => 'www.example.com',
-                        'user' => 'test'
-                    ]
-                ],
-                'messages' => [
-                ],
+                    'success' => true
+                ]
             ],
             $json,
             'Unexpected response content'
         );
+    }
+
+    /**
+     * @throws Exception
+     * @throws JsonException
+     */
+    public function testCheckWithSkipArray(): void
+    {
+        $this->runtimeCheck->expects($this->once())
+            ->method('execute')
+            ->with(
+                [
+                    RuntimeType::CLI->value,
+                ]
+            );
+        $request = $this->createMock(Request::class);
+        $request->method('get')
+            ->with('skip')
+            ->willReturn(
+                [
+                    RuntimeType::CLI->value
+                ]
+            );
+
+        $this->controller->check($request);
+    }
+
+    /**
+     * @throws Exception
+     * @throws JsonException
+     */
+    public function testCheckWithSkipString(): void
+    {
+        $this->runtimeCheck->expects($this->once())
+            ->method('execute')
+            ->with([
+                RuntimeType::CLI->value,
+                RuntimeType::WORKER->value
+            ]);
+        $request = $this->createMock(Request::class);
+        $request->method('get')
+            ->with('skip')
+            ->willReturn(
+                RuntimeType::CLI->value . ',' . RuntimeType::WORKER->value
+            );
+
+        $this->controller->check($request);
+    }
+
+    /**
+     * @throws Exception
+     * @throws JsonException
+     */
+    public function testCheckWithUnsupportedSkipType(): void
+    {
+        $this->runtimeCheck->expects($this->once())
+            ->method('execute')
+            ->with([]);
+        $request = $this->createMock(Request::class);
+        $request->method('get')
+            ->with('skip')
+            ->willReturn(
+                true
+            );
+
+        $this->controller->check($request);
     }
 }

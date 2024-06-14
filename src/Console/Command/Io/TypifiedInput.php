@@ -52,11 +52,6 @@ class TypifiedInput
     public function getBoolOption(string $name): bool
     {
         $value = $this->input->getOption($name);
-        if (!is_bool($value)) {
-            throw new InvalidArgumentException(
-                'option ' . $name . ' must be a boolean: ' . $value
-            );
-        }
-        return (bool)$value;
+        return filter_var($value, FILTER_VALIDATE_BOOLEAN);
     }
 }

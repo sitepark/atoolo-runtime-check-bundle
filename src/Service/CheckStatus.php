@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Atoolo\Runtime\Check\Service;
 
 use InvalidArgumentException;
+use JsonException;
 
 class CheckStatus
 {
@@ -54,6 +55,15 @@ class CheckStatus
     }
 
     /**
+     * @param array<string,mixed> $result
+     */
+    public function replaceReport(string $scope, array $result): self
+    {
+        $this->reports[$scope] = $result;
+        return $this;
+    }
+
+    /**
      * @return array<string,array<string,mixed>>
      */
     public function getReports(): array
@@ -83,20 +93,23 @@ class CheckStatus
     }
 
     /**
-     * @return array<string,mixed>
+     * @return CheckStatusData
      */
     public function serialize(): array
     {
-        return [
+        $data = [
             'success' => $this->success,
-            'reports' => $this->reports,
-            'messages' => $this->messages,
+            'reports' => $this->reports
         ];
+        if (!empty($this->messages)) {
+            $data['messages'] = $this->messages;
+        }
+        return $data;
     }
 
     /**
-     * @param array<string,mixed> $data
-     * @throws \JsonException
+     * @param CheckStatusData $data
+     * @throws JsonException
      */
     public static function deserialize(array $data): CheckStatus
     {
@@ -104,7 +117,12 @@ class CheckStatus
             $data = [
                 'success' => false,
                 'messages' => [
-                    'deserialize' => [json_encode($data, JSON_THROW_ON_ERROR)]
+                    'deserialize' => [
+                        json_encode(
+                            $data,
+                            JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES
+                        )
+                    ]
                 ]
             ];
         }

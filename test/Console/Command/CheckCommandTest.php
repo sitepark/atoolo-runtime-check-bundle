@@ -5,14 +5,16 @@ declare(strict_types=1);
 namespace Atoolo\Runtime\Check\Test\Console\Command;
 
 use Atoolo\Runtime\Check\Console\Command\CheckCommand;
+use Atoolo\Runtime\Check\Service\Checker\ProcessStatus;
 use Atoolo\Runtime\Check\Service\CheckStatus;
-use Atoolo\Runtime\Check\Service\FastCGIStatus;
-use Atoolo\Runtime\Check\Service\FastCgiStatusFactory;
-use Atoolo\Runtime\Check\Service\ProcessStatus;
-use Atoolo\Runtime\Check\Service\WorkerStatusFile;
+use Atoolo\Runtime\Check\Service\Cli\FastCGIStatus;
+use Atoolo\Runtime\Check\Service\Cli\FastCgiStatusFactory;
+use Atoolo\Runtime\Check\Service\Cli\RuntimeCheck;
+use Atoolo\Runtime\Check\Service\RuntimeStatus;
+use Atoolo\Runtime\Check\Service\RuntimeType;
+use Atoolo\Runtime\Check\Service\Worker\WorkerStatusFile;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Tester\CommandTester;
 
 #[CoversClass(CheckCommand::class)]
@@ -20,60 +22,44 @@ class CheckCommandTest extends TestCase
 {
     private CommandTester $commandTester;
 
-    private ProcessStatus $processStatus;
-
-    private FastCGIStatus $fastCgiStatus;
-
-    private string $originScriptFilename;
+    private RuntimeCheck $untimeCheck;
 
     public function setUp(): void
     {
-        $this->originScriptFilename = $_SERVER['SCRIPT_FILENAME'];
-        $_SERVER['SCRIPT_FILENAME'] = '/test/bin/console';
-
-        $fastCgiStatusFactory = $this->createStub(
-            FastCgiStatusFactory::class
-        );
-        $this->fastCgiStatus = $this->createStub(
-            FastCGIStatus::class
-        );
-        $fastCgiStatusFactory->method('create')->willReturn(
-            $this->fastCgiStatus
-        );
-        $workerStatusFile = $this->createStub(
-            WorkerStatusFile::class
-        );
-        $workerStatusFile->method('read')->willReturn(
-            CheckStatus::createSuccess()
-        );
-        $this->processStatus = $this->createStub(
-            ProcessStatus::class
+        $this->runtimeCheck = $this->createStub(
+            RuntimeCheck::class
         );
 
         $command = new CheckCommand(
-            $fastCgiStatusFactory,
-            $workerStatusFile,
-            $this->processStatus
+            $this->runtimeCheck,
         );
 
         $this->commandTester = new CommandTester($command);
     }
 
-    public function tearDown(): void
-    {
-        $_SERVER['SCRIPT_FILENAME'] = $this->originScriptFilename;
-    }
-
     public function testExecuteSuccess(): void
     {
-        $this->fastCgiStatus->method('request')->willReturn(
-            CheckStatus::createSuccess()
+        $checkStatus = CheckStatus::createSuccess();
+        $checkStatus->addReport('test', ['a' => 'b']);
+        $runtimeStatus = new RuntimeStatus();
+        $runtimeStatus->addStatus(RuntimeType::CLI, $checkStatus);
+        $this->runtimeCheck->method('execute')->willReturn(
+            $runtimeStatus
         );
+
         $this->commandTester->execute([]);
-        $this->assertStringContainsString(
-            'Success',
+        $this->assertEquals(
+            <<<EOF
+cli/test
+{
+    "a": "b"
+}
+
+Success
+
+EOF,
             $this->commandTester->getDisplay(),
-            'Command should display success message'
+            'Command should display failure message'
         );
     }
 
@@ -81,19 +67,19 @@ class CheckCommandTest extends TestCase
     {
         $status = CheckStatus::createFailure();
         $status->addMessage('test', 'test message');
-        $this->fastCgiStatus->method('request')->willReturn(
-            $status
+
+        $runtimeStatus = new RuntimeStatus();
+        $runtimeStatus->addStatus(RuntimeType::CLI, $status);
+
+        $this->runtimeCheck->method('execute')->willReturn(
+            $runtimeStatus
         );
+
         $this->commandTester->execute([]);
         $this->assertEquals(
             <<<EOF
-cli
-{
-    "script": "\/test\/bin\/console"
-}
-
 Failure
-test: test message
+cli/test: test message
 
 EOF,
             $this->commandTester->getDisplay(),
@@ -103,13 +89,12 @@ EOF,
 
     public function testJsonResult(): void
     {
-        $this->fastCgiStatus->method('request')->willReturn(
-            CheckStatus::createSuccess()
-        );
-        $this->processStatus->method('getStatus')->willReturn(
-            [
-                'user' => 'user',
-            ]
+        $checkStatus = CheckStatus::createSuccess();
+        $checkStatus->addReport('test', ['a' => 'b']);
+        $runtimeStatus = new RuntimeStatus();
+        $runtimeStatus->addStatus(RuntimeType::CLI, $checkStatus);
+        $this->runtimeCheck->method('execute')->willReturn(
+            $runtimeStatus
         );
 
         $this->commandTester->execute(
@@ -118,14 +103,15 @@ EOF,
         $this->assertEquals(
             <<<EOF
 {
-    "success": true,
-    "reports": {
-        "cli": {
-            "script": "\/test\/bin\/console",
-            "user": "user"
+    "cli": {
+        "success": true,
+        "reports": {
+            "test": {
+                "a": "b"
+            }
         }
     },
-    "messages": []
+    "success": true
 }
 
 EOF,

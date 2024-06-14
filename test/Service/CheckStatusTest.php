@@ -49,6 +49,20 @@ class CheckStatusTest extends TestCase
         );
     }
 
+    public function testReplaceResult(): void
+    {
+        $status = new CheckStatus(true);
+        $status->addReport('scope', ['result']);
+        $status->replaceReport('scope', ['result2']);
+        self::assertSame(
+            [
+                'scope' => ['result2']
+            ],
+            $status->getReports(),
+            'Result was not replaced'
+        );
+    }
+
     public function testAddResultWithScopeAlreadyExists(): void
     {
         $status = new CheckStatus(true);

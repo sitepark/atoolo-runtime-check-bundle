@@ -98,8 +98,11 @@ class TypifiedInputTest extends TestCase
 
         $input = new TypifiedInput($symfonyInput);
 
-        $this->expectException(InvalidArgumentException::class);
-        $input->getBoolOption('a');
+        $this->assertEquals(
+            false,
+            $input->getBoolOption('a'),
+            'unexpected option value'
+        );
     }
 
     /**
