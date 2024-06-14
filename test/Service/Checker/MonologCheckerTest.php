@@ -13,12 +13,25 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Filesystem\Filesystem;
 
 #[CoversClass(MonologChecker::class)]
 class MonologCheckerTest extends TestCase
 {
     private string $resourceDir = __DIR__
        . '/../../resources/Service/Checker/MonologCheckerTest';
+
+    private string $testDir = __DIR__
+        . '/../../../var/test/MonologCheckerTest';
+
+    public function setUp(): void
+    {
+        if (!is_dir($this->testDir)) {
+            if (!mkdir($this->testDir, 0777, true)) {
+                throw new \RuntimeException('Cannot create test directory');
+            }
+        }
+    }
 
     /**
      * @throws Exception
@@ -99,86 +112,114 @@ class MonologCheckerTest extends TestCase
      */
     public function testCheckLogfileNotWritable(): void
     {
-        $file = $this->resourceDir . '/non-writable.log';
-        $handler = $this->createStub(StreamHandler::class);
-        $handler->method('getUrl')->willReturn($file);
-        $handler->method('getLevel')->willReturn(Level::Warning);
-        $logger = $this->createStub(Logger::class);
-        $logger->method('getHandlers')->willReturn([$handler]);
+        $filesystem = new Filesystem();
+        $file = $this->testDir . '/non-writable.log';
+        $filesystem->touch($file);
+        $filesystem->chmod($file, 0444);
 
-        $checker = new MonologChecker($logger);
-        $status = $checker->check([]);
+        try {
+            $handler = $this->createStub(StreamHandler::class);
+            $handler->method('getUrl')->willReturn($file);
+            $handler->method('getLevel')->willReturn(Level::Warning);
+            $logger = $this->createStub(Logger::class);
+            $logger->method('getHandlers')->willReturn([$handler]);
 
-        $expected = CheckStatus::createFailure();
-        $expected->addReport('logging', [
-            'logfile' => $file,
-            'level' => 'WARNING'
-        ]);
-        $expected->addMessage(
-            'logging',
-            'logfile not writable: ' . $file
-        );
-        $this->assertEquals(
-            $expected,
-            $status,
-            'Status is not as expected'
-        );
+            $checker = new MonologChecker($logger);
+            $status = $checker->check([]);
+
+            $expected = CheckStatus::createFailure();
+            $expected->addReport('logging', [
+                'logfile' => $file,
+                'level' => 'WARNING'
+            ]);
+            $expected->addMessage(
+                'logging',
+                'logfile not writable: ' . $file
+            );
+            $this->assertEquals(
+                $expected,
+                $status,
+                'Status is not as expected'
+            );
+        } finally {
+            $filesystem->chmod($file, 0666);
+            $filesystem->remove($file);
+        }
     }
 
     public function testCheckDirNotCreateable(): void
     {
-        $file = $this->resourceDir . '/not-writable/not-createable/logging.log';
-        $handler = $this->createStub(StreamHandler::class);
-        $handler->method('getUrl')->willReturn($file);
-        $handler->method('getLevel')->willReturn(Level::Warning);
-        $logger = $this->createStub(Logger::class);
-        $logger->method('getHandlers')->willReturn([$handler]);
+        $filesystem = new Filesystem();
+        $dir = $this->testDir . '/not-writable/not-createable/logging.log';
+        $file = $dir . '/not-createable/logging.log';
+        $filesystem->mkdir($dir);
+        $filesystem->chmod($dir, 0444);
+        try {
+            $handler = $this->createStub(StreamHandler::class);
+            $handler->method('getUrl')->willReturn($file);
+            $handler->method('getLevel')->willReturn(Level::Warning);
+            $logger = $this->createStub(Logger::class);
+            $logger->method('getHandlers')->willReturn([$handler]);
 
-        $checker = new MonologChecker($logger);
-        $status = $checker->check([]);
+            $checker = new MonologChecker($logger);
+            $status = $checker->check([]);
 
-        $expected = CheckStatus::createFailure();
-        $expected->addReport('logging', [
-            'logfile' => $file,
-            'level' => 'WARNING'
-        ]);
-        $expected->addMessage(
-            'logging',
-            'log directory cannot be created: ' . dirname($file)
-        );
-        $this->assertEquals(
-            $expected,
-            $status,
-            'Status is not as expected'
-        );
+            $expected = CheckStatus::createFailure();
+            $expected->addReport('logging', [
+                'logfile' => $file,
+                'level' => 'WARNING'
+            ]);
+            $expected->addMessage(
+                'logging',
+                'log directory cannot be created: ' . dirname($file)
+            );
+            $this->assertEquals(
+                $expected,
+                $status,
+                'Status is not as expected'
+            );
+        } finally {
+            $filesystem->chmod($dir, 0777);
+            $filesystem->remove($dir);
+        }
     }
 
     public function testCheckFileNotCreateable(): void
     {
-        $file = $this->resourceDir . '/not-writable/logging.log';
-        $handler = $this->createStub(StreamHandler::class);
-        $handler->method('getUrl')->willReturn($file);
-        $handler->method('getLevel')->willReturn(Level::Warning);
-        $logger = $this->createStub(Logger::class);
-        $logger->method('getHandlers')->willReturn([$handler]);
+        $filesystem = new Filesystem();
+        $dir = $this->testDir . '/not-writable';
+        $file = $dir . '/logging.log';
+        $filesystem->mkdir($dir);
+        $filesystem->chmod($dir, 0444);
 
-        $checker = new MonologChecker($logger);
-        $status = $checker->check([]);
+        try {
+            $handler = $this->createStub(StreamHandler::class);
+            $handler->method('getUrl')->willReturn($file);
+            $handler->method('getLevel')->willReturn(Level::Warning);
+            $logger = $this->createStub(Logger::class);
+            $logger->method('getHandlers')->willReturn([$handler]);
 
-        $expected = CheckStatus::createFailure();
-        $expected->addReport('logging', [
-            'logfile' => $file,
-            'level' => 'WARNING'
-        ]);
-        $expected->addMessage(
-            'logging',
-            'logfile cannot be created: ' . $file
-        );
-        $this->assertEquals(
-            $expected,
-            $status,
-            'Status is not as expected'
-        );
+            $checker = new MonologChecker($logger);
+            $status = $checker->check([]);
+
+            $expected = CheckStatus::createFailure();
+            $expected->addReport('logging', [
+                'logfile' => $file,
+                'level' => 'WARNING'
+            ]);
+            $expected->addMessage(
+                'logging',
+                'logfile cannot be created: ' . $file
+            );
+            $this->assertEquals(
+                $expected,
+                $status,
+                'Status is not as expected'
+            );
+        } finally {
+            $filesystem->chmod($dir, 0777);
+            $filesystem->remove($dir);
+        }
     }
 
     public function testCheckSuccessfully(): void

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "7417c3b4c974266bc3a599f2528f2b5d",
+    "content-hash": "e5e6fe2372f6927e829b4021bed439b0",
     "packages": [
         {
             "name": "hollodotme/fast-cgi-client",
