@@ -7,6 +7,7 @@ namespace Atoolo\Runtime\Check\Test\Service\Cli;
 use Atoolo\Runtime\Check\Service\Cli\FastCgiStatusFactory;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
 
 #[CoversClass(FastCgiStatusFactory::class)]
 class FastCgiStatusFactoryTest extends TestCase
@@ -18,9 +19,9 @@ class FastCgiStatusFactoryTest extends TestCase
     {
         $factory = new FastCgiStatusFactory(
             possibleSocketFilePatterns: [],
-            frontControllerPath: '',
-            resourceRoot: '',
-            resourceHost: ''
+            frontControllerPath: 'test',
+            resourceRoot: 'test',
+            resourceHost: 'test'
         );
         $status = $factory->create();
 
@@ -35,9 +36,9 @@ class FastCgiStatusFactoryTest extends TestCase
     {
         $factory = new FastCgiStatusFactory(
             possibleSocketFilePatterns: [],
-            frontControllerPath: '',
-            resourceRoot: '',
-            resourceHost: ''
+            frontControllerPath: 'test',
+            resourceRoot: 'test',
+            resourceHost: 'test'
         );
         $status = $factory->create('1.2.3.4:9000');
 
@@ -54,9 +55,9 @@ class FastCgiStatusFactoryTest extends TestCase
             possibleSocketFilePatterns: [
                 $this->resourceDir . '/unix-*'
             ],
-            frontControllerPath: '',
-            resourceRoot: '',
-            resourceHost: ''
+            frontControllerPath: 'test',
+            resourceRoot: 'test',
+            resourceHost: 'test'
         );
 
         $status = $factory->create();
@@ -65,6 +66,28 @@ class FastCgiStatusFactoryTest extends TestCase
             $this->resourceDir . '/unix-socket',
             $status->getSocket(),
             'Unexpected socket'
+        );
+    }
+
+    public function testWithNullResourceRoot(): void
+    {
+        $this->expectException(RuntimeException::class);
+        new FastCgiStatusFactory(
+            possibleSocketFilePatterns: [],
+            frontControllerPath: 'test',
+            resourceRoot: null,
+            resourceHost: 'test'
+        );
+    }
+
+    public function testWithNullResourceHost(): void
+    {
+        $this->expectException(RuntimeException::class);
+        new FastCgiStatusFactory(
+            possibleSocketFilePatterns: [],
+            frontControllerPath: 'test',
+            resourceRoot: 'test',
+            resourceHost: null
         );
     }
 }

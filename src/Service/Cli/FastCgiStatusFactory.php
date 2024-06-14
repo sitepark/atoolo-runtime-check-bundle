@@ -8,6 +8,7 @@ use hollodotme\FastCGI\Client;
 use hollodotme\FastCGI\Interfaces\ConfiguresSocketConnection;
 use hollodotme\FastCGI\SocketConnections\NetworkSocket;
 use hollodotme\FastCGI\SocketConnections\UnixDomainSocket;
+use RuntimeException;
 
 class FastCgiStatusFactory
 {
@@ -18,9 +19,23 @@ class FastCgiStatusFactory
     public function __construct(
         private readonly array $possibleSocketFilePatterns,
         private readonly string $frontControllerPath,
-        private readonly string $resourceRoot,
-        private readonly string $resourceHost
+        private readonly ?string $resourceRoot,
+        private readonly ?string $resourceHost
     ) {
+        if (empty($this->resourceRoot)) {
+            throw new RuntimeException(
+                <<<EOF
+                The resource host could not be determined.
+                This is the case if the console command was not
+                called via the host path
+                EOF
+            );
+        }
+        if (empty($this->resourceHost)) {
+            throw new RuntimeException(
+                'resource host not set'
+            );
+        }
     }
 
     public function create(?string $socket = null): FastCgiStatus
