@@ -6,6 +6,7 @@ namespace Atoolo\Runtime\Check\Test\Service\Checker;
 
 use Atoolo\Runtime\Check\Service\Checker\MonologChecker;
 use Atoolo\Runtime\Check\Service\CheckStatus;
+use Monolog\Handler\FingersCrossedHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Level;
 use Monolog\Logger;
@@ -93,8 +94,12 @@ class MonologCheckerTest extends TestCase
         );
         $expected = CheckStatus::createFailure();
         $expected->addReport('logging', [
-            'logfile' => null,
-            'level' => 'WARNING'
+            'handler' => [
+                [
+                    'logfile' => null,
+                    'level' => 'WARNING'
+                ]
+            ]
         ]);
         $expected->addMessage(
             'logging',
@@ -129,8 +134,12 @@ class MonologCheckerTest extends TestCase
 
             $expected = CheckStatus::createFailure();
             $expected->addReport('logging', [
-                'logfile' => $file,
-                'level' => 'WARNING'
+                'handler' => [
+                     [
+                        'logfile' => $file,
+                        'level' => 'WARNING'
+                     ]
+                ]
             ]);
             $expected->addMessage(
                 'logging',
@@ -166,8 +175,12 @@ class MonologCheckerTest extends TestCase
 
             $expected = CheckStatus::createFailure();
             $expected->addReport('logging', [
-                'logfile' => $file,
-                'level' => 'WARNING'
+                'handler' => [
+                    [
+                        'logfile' => $file,
+                        'level' => 'WARNING'
+                    ]
+                ]
             ]);
             $expected->addMessage(
                 'logging',
@@ -204,8 +217,12 @@ class MonologCheckerTest extends TestCase
 
             $expected = CheckStatus::createFailure();
             $expected->addReport('logging', [
-                'logfile' => $file,
-                'level' => 'WARNING'
+                'handler' => [
+                    [
+                        'logfile' => $file,
+                        'level' => 'WARNING'
+                    ]
+                ]
             ]);
             $expected->addMessage(
                 'logging',
@@ -236,8 +253,49 @@ class MonologCheckerTest extends TestCase
 
         $expected = CheckStatus::createSuccess();
         $expected->addReport('logging', [
-            'logfile' => $file,
-            'level' => 'WARNING'
+            'handler' => [
+                [
+                    'logfile' => $file,
+                    'level' => 'WARNING'
+                ]
+            ]
+        ]);
+        $this->assertEquals(
+            $expected,
+            $status,
+            'Status is not as expected'
+        );
+    }
+
+    public function testWithFingersCrossedHandler(): void
+    {
+        $file = $this->resourceDir . '/logging.log';
+
+
+        $handler = $this->createStub(StreamHandler::class);
+        $handler->method('getUrl')->willReturn($file);
+        $handler->method('getLevel')->willReturn(Level::Warning);
+
+        $fingersCrossedHandler = $this->createStub(
+            FingersCrossedHandler::class
+        );
+        $fingersCrossedHandler->method('getHandler')
+            ->willReturn($handler);
+
+        $logger = $this->createStub(Logger::class);
+        $logger->method('getHandlers')->willReturn([$fingersCrossedHandler]);
+
+        $checker = new MonologChecker($logger);
+        $status = $checker->check([]);
+
+        $expected = CheckStatus::createSuccess();
+        $expected->addReport('logging', [
+            'handler' => [
+                [
+                    'logfile' => $file,
+                    'level' => 'WARNING'
+                ]
+            ]
         ]);
         $this->assertEquals(
             $expected,

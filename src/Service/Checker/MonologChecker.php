@@ -6,6 +6,7 @@ namespace Atoolo\Runtime\Check\Service\Checker;
 
 use Atoolo\Runtime\Check\Service\CheckStatus;
 use Monolog\Handler\StreamHandler;
+use Monolog\Handler\FingersCrossedHandler;
 use Monolog\Logger;
 use Psr\Log\LoggerInterface;
 
@@ -32,8 +33,8 @@ class MonologChecker implements Checker
             return $status;
         }
 
-        $handler = $this->getStreamHandler($this->logger);
-        if ($handler === null) {
+        $handlers = $this->getStreamHandlers($this->logger);
+        if (empty($handlers)) {
             $status = CheckStatus::createFailure();
             $status->addMessage(
                 $this->getScope(),
@@ -42,15 +43,28 @@ class MonologChecker implements Checker
             return $status;
         }
 
+        $status = CheckStatus::createSuccess();
+        foreach ($handlers as $handler) {
+            $status = $this->checkHandler($status, $handler);
+        }
+        return $status;
+    }
+
+    private function checkHandler(
+        CheckStatus $mergedStatus,
+        StreamHandler $handler
+    ): CheckStatus {
         $file = $handler->getUrl();
         if ($file === null) {
             return $this->createFailure(
+                $mergedStatus,
                 $handler,
                 'logfile not set'
             );
         }
         if (file_exists($file) && !is_writable($file)) {
             return $this->createFailure(
+                $mergedStatus,
                 $handler,
                 'logfile not writable: ' . $file
             );
@@ -61,6 +75,7 @@ class MonologChecker implements Checker
             if (!is_dir($dir)) {
                 if (!@mkdir($dir, 0777, true) && !is_dir($dir)) {
                     return $this->createFailure(
+                        $mergedStatus,
                         $handler,
                         'log directory cannot be created: ' . $dir
                     );
@@ -69,42 +84,68 @@ class MonologChecker implements Checker
 
             if (!@touch($file)) {
                 return $this->createFailure(
+                    $mergedStatus,
                     $handler,
                     'logfile cannot be created: ' . $file
                 );
             }
         }
 
-        $status = CheckStatus::createSuccess();
-        $status->addReport($this->getScope(), [
-            'logfile' => $handler->getUrl(),
-            'level' => $handler->getLevel()->getName(),
-        ]);
-
-        return $status;
+        return $this->createSuccess(
+            $mergedStatus,
+            $handler
+        );
     }
 
-    public function createFailure(
+    private function createFailure(
+        CheckStatus $mergedStatus,
         StreamHandler $handler,
         string $message
     ): CheckStatus {
-        $status = CheckStatus::createFailure();
-        $status->addReport($this->getScope(), [
+        $status = $mergedStatus->apply(CheckStatus::createFailure());
+        $status->addMessage($this->getScope(), $message);
+        return $this->applyStatusReport($status, $handler);
+    }
+
+    private function createSuccess(
+        CheckStatus $mergedStatus,
+        StreamHandler $handler,
+    ): CheckStatus {
+        $status = $mergedStatus->apply(CheckStatus::createSuccess());
+        return $this->applyStatusReport($status, $handler);
+    }
+
+    private function applyStatusReport(
+        CheckStatus $status,
+        StreamHandler $handler
+    ): CheckStatus {
+        $report = $status->getReport($this->getScope());
+        $report['handler'][] = [
             'logfile' => $handler->getUrl(),
             'level' => $handler->getLevel()->getName(),
-        ]);
-        $status->addMessage($this->getScope(), $message);
+        ];
+        $status->replaceReport($this->getScope(), $report);
         return $status;
     }
 
-    private function getStreamHandler(
+    /**
+     * @param Logger $logger
+     * @return array<StreamHandler>
+     */
+    private function getStreamHandlers(
         Logger $logger
-    ): ?StreamHandler {
+    ): array {
+        $handlers = [];
         foreach ($logger->getHandlers() as $handler) {
-            if ($handler instanceof StreamHandler) {
-                return $handler;
+            if ($handler instanceof FingersCrossedHandler) {
+                $nestedHandler = $handler->getHandler();
+                if ($nestedHandler instanceof StreamHandler) {
+                    $handlers[] = $nestedHandler;
+                }
+            } elseif ($handler instanceof StreamHandler) {
+                $handlers[] = $handler;
             }
         }
-        return null;
+        return $handlers;
     }
 }

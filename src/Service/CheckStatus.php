@@ -64,6 +64,17 @@ class CheckStatus
     }
 
     /**
+     * @return array<string,mixed>
+     */
+    public function getReport(string $scope): array
+    {
+        if (!isset($this->reports[$scope])) {
+            return [];
+        }
+        return $this->reports[$scope];
+    }
+
+    /**
      * @return array<string,array<string,mixed>>
      */
     public function getReports(): array

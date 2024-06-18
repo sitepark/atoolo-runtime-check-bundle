@@ -36,7 +36,7 @@ class CheckStatusTest extends TestCase
         );
     }
 
-    public function testAddResult(): void
+    public function testAddReport(): void
     {
         $status = new CheckStatus(true);
         $status->addReport('scope', ['result']);
@@ -49,7 +49,7 @@ class CheckStatusTest extends TestCase
         );
     }
 
-    public function testReplaceResult(): void
+    public function testReplaceReport(): void
     {
         $status = new CheckStatus(true);
         $status->addReport('scope', ['result']);
@@ -60,6 +60,27 @@ class CheckStatusTest extends TestCase
             ],
             $status->getReports(),
             'Result was not replaced'
+        );
+    }
+
+    public function testGetReport(): void
+    {
+        $status = new CheckStatus(true);
+        $status->addReport('scope', ['result']);
+        self::assertSame(
+            ['result'],
+            $status->getReport('scope'),
+            'unexpected result'
+        );
+    }
+
+    public function testGetMissingReport(): void
+    {
+        $status = new CheckStatus(true);
+        self::assertSame(
+            [],
+            $status->getReport('scope'),
+            'unexpected result'
         );
     }
 
