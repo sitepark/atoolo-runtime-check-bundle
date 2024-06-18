@@ -12,6 +12,9 @@ use RuntimeException;
 
 class FastCgiStatusFactory
 {
+    private readonly string $resourceRoot;
+    private readonly string $resourceHost;
+
     /**
      * @param array<string> $possibleSocketFilePatterns
      * of patterns matching php socket files
@@ -19,10 +22,10 @@ class FastCgiStatusFactory
     public function __construct(
         private readonly array $possibleSocketFilePatterns,
         private readonly string $frontControllerPath,
-        private readonly ?string $resourceRoot,
-        private readonly ?string $resourceHost
+        ?string $resourceRoot,
+        ?string $resourceHost
     ) {
-        if (empty($this->resourceRoot)) {
+        if (empty($resourceRoot)) {
             throw new RuntimeException(
                 <<<EOF
                 The resource host could not be determined.
@@ -31,11 +34,14 @@ class FastCgiStatusFactory
                 EOF
             );
         }
-        if (empty($this->resourceHost)) {
+        if (empty($resourceHost)) {
             throw new RuntimeException(
                 'resource host not set'
             );
         }
+
+        $this->resourceRoot = $resourceRoot;
+        $this->resourceHost = $resourceHost;
     }
 
     public function create(?string $socket = null): FastCgiStatus
