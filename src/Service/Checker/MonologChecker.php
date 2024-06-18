@@ -119,6 +119,14 @@ class MonologChecker implements Checker
         CheckStatus $status,
         StreamHandler $handler
     ): CheckStatus {
+        /**
+         * @var array{
+         *   handler: array{
+         *     logfile: string,
+         *     level: string
+         *   }
+         * } $report
+         */
         $report = $status->getReport($this->getScope());
         $report['handler'][] = [
             'logfile' => $handler->getUrl(),
