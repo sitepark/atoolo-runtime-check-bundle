@@ -74,6 +74,7 @@ services:
     arguments:
       - '@Atoolo\Runtime\Check\Service\Worker\WorkerStatusFile'
       - '@Atoolo\Runtime\Check\Service\Checker\CheckerCollection'
+      - '%atoolo_resource.resource_host%'
 
   Atoolo\Runtime\Check\Console\Command\CheckCommand:
     arguments:

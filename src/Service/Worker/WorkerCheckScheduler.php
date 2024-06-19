@@ -24,6 +24,7 @@ class WorkerCheckScheduler implements ScheduleProviderInterface
     public function __construct(
         private readonly WorkerStatusFile $workerStatusFile,
         private readonly CheckerCollection $checkerCollection,
+        private readonly string $host,
         private readonly LockFactory $lockFactory = new LockFactory(
             new SemaphoreStore()
         ),
@@ -43,7 +44,7 @@ class WorkerCheckScheduler implements ScheduleProviderInterface
                     new WorkerCheckEvent()
                 ),
             )->lock($this->lockFactory->createLock(
-                'runtime-check-scheduler'
+                'runtime-check-scheduler-' . $this->host
             ));
     }
 
