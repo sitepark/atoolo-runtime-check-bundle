@@ -3,6 +3,9 @@ parameters:
   env(SUPERVISOR_GROUP_NAME): default
   ## The period in minutes after which the worker status file is updated.
   atoolo_runtime_check.worker_status_update_period: 10
+  atoolo_runtime_check.checker.monolog.max_log_file_size: '100M'
+  atoolo_runtime_check.checker.monolog.max_log_dir_size: '10G'
+  atoolo_runtime_check.checker.monolog.max_log_file_rotations: 10
 
 services:
 
@@ -38,6 +41,9 @@ services:
 
   Atoolo\Runtime\Check\Service\Checker\MonologChecker:
     arguments:
+      - '%atoolo_runtime_check.checker.monolog.max_log_file_size%',
+      - '%atoolo_runtime_check.checker.monolog.max_log_dir_size%',
+      - '%atoolo_runtime_check.checker.monolog.max_log_file_rotations%',
       - '@logger'
     tags:
       - { name: 'atoolo_runtime_check.checker' }

@@ -40,7 +40,7 @@ class MonologCheckerTest extends TestCase
     public function testCheckWithWrongLogger(): void
     {
         $logger = $this->createStub(LoggerInterface::class);
-        $checker = new MonologChecker($logger);
+        $checker = new MonologChecker('', '', 0, $logger);
         $status = $checker->check([]);
 
         $expected = CheckStatus::createFailure();
@@ -61,7 +61,7 @@ class MonologCheckerTest extends TestCase
     public function testCheckWithoutStreamHandler(): void
     {
         $logger = $this->createStub(Logger::class);
-        $checker = new MonologChecker($logger);
+        $checker = new MonologChecker('', '', 0, $logger);
         $status = $checker->check([]);
 
         $expected = CheckStatus::createFailure();
@@ -84,7 +84,7 @@ class MonologCheckerTest extends TestCase
         $handler->method('getLevel')->willReturn(Level::Warning);
         $logger->method('getHandlers')->willReturn([$handler]);
 
-        $checker = new MonologChecker($logger);
+        $checker = new MonologChecker('', '', 0, $logger);
         $status = $checker->check([]);
 
         $expected = CheckStatus::createFailure();
@@ -129,7 +129,7 @@ class MonologCheckerTest extends TestCase
             $logger = $this->createStub(Logger::class);
             $logger->method('getHandlers')->willReturn([$handler]);
 
-            $checker = new MonologChecker($logger);
+            $checker = new MonologChecker('', '', 0, $logger);
             $status = $checker->check([]);
 
             $expected = CheckStatus::createFailure();
@@ -137,7 +137,10 @@ class MonologCheckerTest extends TestCase
                 'handler' => [
                      [
                         'logfile' => $file,
-                        'level' => 'WARNING'
+                        'level' => 'WARNING',
+                        'logfile-size' => 0,
+                        'logdir-size' => 0,
+                        'logfile-rotations' => 0
                      ]
                 ]
             ]);
@@ -170,7 +173,7 @@ class MonologCheckerTest extends TestCase
             $logger = $this->createStub(Logger::class);
             $logger->method('getHandlers')->willReturn([$handler]);
 
-            $checker = new MonologChecker($logger);
+            $checker = new MonologChecker('', '', 0, $logger);
             $status = $checker->check([]);
 
             $expected = CheckStatus::createFailure();
@@ -212,7 +215,7 @@ class MonologCheckerTest extends TestCase
             $logger = $this->createStub(Logger::class);
             $logger->method('getHandlers')->willReturn([$handler]);
 
-            $checker = new MonologChecker($logger);
+            $checker = new MonologChecker('', '', 0, $logger);
             $status = $checker->check([]);
 
             $expected = CheckStatus::createFailure();
@@ -248,7 +251,7 @@ class MonologCheckerTest extends TestCase
         $logger = $this->createStub(Logger::class);
         $logger->method('getHandlers')->willReturn([$handler]);
 
-        $checker = new MonologChecker($logger);
+        $checker = new MonologChecker('10M', '10X', 0, $logger);
         $status = $checker->check([]);
 
         $expected = CheckStatus::createSuccess();
@@ -256,7 +259,10 @@ class MonologCheckerTest extends TestCase
             'handler' => [
                 [
                     'logfile' => $file,
-                    'level' => 'WARNING'
+                    'level' => 'WARNING',
+                    'logfile-size' => 18,
+                    'logdir-size' => 70,
+                    'logfile-rotations' => 4
                 ]
             ]
         ]);
@@ -285,7 +291,7 @@ class MonologCheckerTest extends TestCase
         $logger = $this->createStub(Logger::class);
         $logger->method('getHandlers')->willReturn([$fingersCrossedHandler]);
 
-        $checker = new MonologChecker($logger);
+        $checker = new MonologChecker('', '', 0, $logger);
         $status = $checker->check([]);
 
         $expected = CheckStatus::createSuccess();
@@ -293,10 +299,52 @@ class MonologCheckerTest extends TestCase
             'handler' => [
                 [
                     'logfile' => $file,
-                    'level' => 'WARNING'
+                    'level' => 'WARNING',
+                    'logfile-size' => 18,
+                    'logdir-size' => 70,
+                    'logfile-rotations' => 4
                 ]
             ]
         ]);
+        $this->assertEquals(
+            $expected,
+            $status,
+            'Status is not as expected'
+        );
+    }
+
+    public function testCheckLogRotatingWithErrors(): void
+    {
+        $file = $this->resourceDir . '/logging.log';
+        $handler = $this->createStub(StreamHandler::class);
+        $handler->method('getUrl')->willReturn($file);
+        $handler->method('getLevel')->willReturn(Level::Warning);
+        $logger = $this->createStub(Logger::class);
+        $logger->method('getHandlers')->willReturn([$handler]);
+
+        $checker = new MonologChecker('10', '20', 1, $logger);
+        $status = $checker->check([]);
+
+        $expected = CheckStatus::createFailure();
+        $expected->addReport('logging', [
+            'handler' => [
+                [
+                    'logfile' => $file,
+                    'level' => 'WARNING',
+                    'logfile-size' => 18,
+                    'logdir-size' => 70,
+                    'logfile-rotations' => 4
+                ]
+            ]
+        ]);
+        $expected->addMessages(
+            'logging',
+            [
+                'logfile size exceeds 10 bytes',
+                'logdir size exceeds 20 bytes',
+                'logfile rotations exceed 1'
+            ]
+        );
         $this->assertEquals(
             $expected,
             $status,

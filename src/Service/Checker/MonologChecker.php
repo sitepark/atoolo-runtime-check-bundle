@@ -9,10 +9,25 @@ use Monolog\Handler\StreamHandler;
 use Monolog\Handler\FingersCrossedHandler;
 use Monolog\Logger;
 use Psr\Log\LoggerInterface;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
+use SplFileInfo;
 
+/**
+ * @phpstan-type ReportData = array{
+ *     logfile: ?string,
+ *     level: string,
+ *     logfile-size?: int,
+ *     logdir-size?: int,
+ *     logfile-rotations?: int
+ * }
+ */
 class MonologChecker implements Checker
 {
     public function __construct(
+        private readonly string $maxLogFileSize,
+        private readonly string $maxLogDirSize,
+        private readonly int $maxLogFileRotations,
         private readonly LoggerInterface $logger
     ) {
     }
@@ -54,84 +69,175 @@ class MonologChecker implements Checker
         CheckStatus $mergedStatus,
         StreamHandler $handler
     ): CheckStatus {
+
+        $reportData = $this->getReportData($handler);
         $file = $handler->getUrl();
-        if ($file === null) {
+
+        $errors = [];
+        $logfileError = $this->checkLogfile($file);
+        if ($logfileError !== null) {
+            $errors[] = $logfileError;
+        }
+        $rotatingErrors = $this->checkLogRotating($reportData);
+        $errors = array_merge($errors, $rotatingErrors);
+
+        if (!empty($errors)) {
             return $this->createFailure(
                 $mergedStatus,
-                $handler,
-                'logfile not set'
+                $reportData,
+                $errors
             );
         }
+
+        return $this->createSuccess(
+            $mergedStatus,
+            $reportData
+        );
+    }
+
+    /**
+     * @return ReportData
+     */
+    private function getReportData(StreamHandler $handler): array
+    {
+        $file = $handler->getUrl();
+        $reportData = [
+            'logfile' => $file,
+            'level' => $handler->getLevel()->getName(),
+        ];
+
+        if ($file === null || !file_exists($file) || !is_readable($file)) {
+            return $reportData;
+        }
+
+        $dir = dirname($file);
+
+        $fileSize = filesize($file) ?: 0;
+        $reportData['logfile-size'] = $fileSize;
+
+        $rii = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($dir)
+        );
+
+        $dirSize = 0;
+        /** @var SplFileInfo $f */
+        foreach ($rii as $f) {
+            if ($f->isDir()) {
+                continue;
+            }
+            $dirSize += $f->getSize() ?: 0;
+        }
+        $reportData['logdir-size'] = $dirSize;
+
+        $rotations =
+            count(glob($file . '.*.gz') ?: [])
+            + count(glob($file . '.[0-9]') ?: []);
+        $reportData['logfile-rotations'] = $rotations;
+
+        return $reportData;
+    }
+
+    private function checkLogfile(?string $file): ?string
+    {
+        if ($file === null) {
+            return'logfile not set';
+        }
         if (file_exists($file) && !is_writable($file)) {
-            return $this->createFailure(
-                $mergedStatus,
-                $handler,
-                'logfile not writable: ' . $file
-            );
+            return 'logfile not writable: ' . $file;
         }
 
         if (!file_exists($file)) {
             $dir = dirname($file);
             if (!is_dir($dir)) {
                 if (!@mkdir($dir, 0777, true) && !is_dir($dir)) {
-                    return $this->createFailure(
-                        $mergedStatus,
-                        $handler,
-                        'log directory cannot be created: ' . $dir
-                    );
+                        return 'log directory cannot be created: ' . $dir;
                 }
             }
 
             if (!@touch($file)) {
-                return $this->createFailure(
-                    $mergedStatus,
-                    $handler,
-                    'logfile cannot be created: ' . $file
-                );
+                return 'logfile cannot be created: ' . $file;
             }
         }
 
-        return $this->createSuccess(
-            $mergedStatus,
-            $handler
-        );
+        return null;
     }
 
+    /**
+     * @param ReportData $reportData
+     * @return array<string>
+     */
+    private function checkLogRotating(array $reportData): array
+    {
+        $errors = [];
+
+        $maxLogFileSize = $this->toMemoryStringToInteger($this->maxLogFileSize);
+        if (
+            $maxLogFileSize > 0
+            && ($reportData['logfile-size'] ?? 0) > $maxLogFileSize
+        ) {
+            $errors[] = 'logfile size exceeds '
+                . $this->maxLogFileSize . ' bytes';
+        }
+
+        $maxLogDirSize = $this->toMemoryStringToInteger($this->maxLogDirSize);
+        if (
+            $maxLogDirSize > 0
+            && ($reportData['logdir-size'] ?? 0) > $maxLogDirSize
+        ) {
+            $errors[] = 'logdir size exceeds '
+                . $this->maxLogDirSize . ' bytes';
+        }
+        if (
+            $this->maxLogFileRotations > 0
+            && ($reportData['logfile-rotations'] ?? 0)
+                > $this->maxLogFileRotations
+        ) {
+            $errors[] = 'logfile rotations exceed '
+                . $this->maxLogFileRotations;
+        }
+
+        return $errors;
+    }
+
+    /**
+     * @param ReportData $reportData
+     * @param array<string> $messages
+     */
     private function createFailure(
         CheckStatus $mergedStatus,
-        StreamHandler $handler,
-        string $message
+        array $reportData,
+        array $messages
     ): CheckStatus {
         $status = $mergedStatus->apply(CheckStatus::createFailure());
-        $status->addMessage($this->getScope(), $message);
-        return $this->applyStatusReport($status, $handler);
+        $status->addMessages($this->getScope(), $messages);
+        return $this->applyStatusReport($status, $reportData);
     }
 
+    /**
+     * @param ReportData $reportData
+     */
     private function createSuccess(
         CheckStatus $mergedStatus,
-        StreamHandler $handler,
+        array $reportData,
     ): CheckStatus {
         $status = $mergedStatus->apply(CheckStatus::createSuccess());
-        return $this->applyStatusReport($status, $handler);
+        return $this->applyStatusReport($status, $reportData);
     }
 
+    /**
+     * @param ReportData $reportData
+     */
     private function applyStatusReport(
         CheckStatus $status,
-        StreamHandler $handler
+        array $reportData
     ): CheckStatus {
         /**
          * @var array{
-         *   handler: array{
-         *     logfile: string,
-         *     level: string
-         *   }
+         *   handler: ReportData
          * } $report
          */
         $report = $status->getReport($this->getScope());
-        $report['handler'][] = [
-            'logfile' => $handler->getUrl(),
-            'level' => $handler->getLevel()->getName(),
-        ];
+        $report['handler'][] = $reportData;
         $status->replaceReport($this->getScope(), $report);
         return $status;
     }
@@ -155,5 +261,19 @@ class MonologChecker implements Checker
             }
         }
         return $handlers;
+    }
+
+    private function toMemoryStringToInteger(string $memory): int
+    {
+        [$number, $suffix] = sscanf($memory, '%u%c') ?? [null, null];
+        if (!is_string($suffix)) {
+            return (int)$memory;
+        }
+
+        $pos = stripos(' KMG', $suffix);
+        if (!is_int($pos) || !is_int($number)) {
+            return 0;
+        }
+        return $number * (1024 ** $pos);
     }
 }

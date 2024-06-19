@@ -35,10 +35,21 @@ class CheckStatus
 
     public function addMessage(string $scope, string $message): self
     {
+        return $this->addMessages($scope, [$message]);
+    }
+
+    /**
+     * @param array<string> $messages
+     */
+    public function addMessages(string $scope, array $messages): self
+    {
         if (!isset($this->messages[$scope])) {
             $this->messages[$scope] = [];
         }
-        $this->messages[$scope][] = $message;
+        $this->messages[$scope] = array_merge(
+            $this->messages[$scope],
+            $messages
+        );
         return $this;
     }
 
