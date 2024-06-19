@@ -24,6 +24,7 @@ class WorkerCheckSchedulerTest extends TestCase
         $workerCheckScheduler = new WorkerCheckScheduler(
             $workerStatusFile,
             $checkerCollection,
+            'www',
             $lockFactory
         );
 
@@ -47,6 +48,7 @@ class WorkerCheckSchedulerTest extends TestCase
         $workerCheckScheduler = new WorkerCheckScheduler(
             $workerStatusFile,
             $checkerCollection,
+            'www',
             $lockFactory
         );
 
