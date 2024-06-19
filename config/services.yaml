@@ -41,9 +41,9 @@ services:
 
   Atoolo\Runtime\Check\Service\Checker\MonologChecker:
     arguments:
-      - '%atoolo_runtime_check.checker.monolog.max_log_file_size%',
-      - '%atoolo_runtime_check.checker.monolog.max_log_dir_size%',
-      - '%atoolo_runtime_check.checker.monolog.max_log_file_rotations%',
+      - '%atoolo_runtime_check.checker.monolog.max_log_file_size%'
+      - '%atoolo_runtime_check.checker.monolog.max_log_dir_size%'
+      - '%atoolo_runtime_check.checker.monolog.max_log_file_rotations%'
       - '@logger'
     tags:
       - { name: 'atoolo_runtime_check.checker' }
