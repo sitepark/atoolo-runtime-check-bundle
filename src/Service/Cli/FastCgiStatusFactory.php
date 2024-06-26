@@ -28,9 +28,9 @@ class FastCgiStatusFactory
         if (empty($resourceRoot)) {
             throw new RuntimeException(
                 <<<EOF
-                The resource host could not be determined.
+                The resource-root could not be determined.
                 This is the case if the console command was not
-                called via the host path
+                called via the resource-root path
                 EOF
             );
         }
