@@ -10,6 +10,7 @@ use Atoolo\Runtime\Check\Service\CheckStatus;
 use Atoolo\Runtime\Check\Service\Platform;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
 
 function fpm_get_status(): array
 {
@@ -119,6 +120,16 @@ class PhpStatusTest extends TestCase
             $expected,
             $status,
             'Unexpected status'
+        );
+    }
+
+    public function testGetStatusWithUnreadableConfig(): void
+    {
+        $this->expectException(RuntimeException::class);
+        new PhpStatus(
+            $this->resourceDir . '/non-exists-phpStatus.json',
+            'fpm-fcgi',
+            $this->platform
         );
     }
 }

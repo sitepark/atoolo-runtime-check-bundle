@@ -6,6 +6,7 @@ namespace Atoolo\Runtime\Check\Service\Checker;
 
 use Atoolo\Runtime\Check\Service\CheckStatus;
 use Atoolo\Runtime\Check\Service\Platform;
+use RuntimeException;
 
 /**
  * @phpstan-type Config array{
@@ -32,9 +33,15 @@ class PhpStatus
         private readonly string $sapi = PHP_SAPI,
         private readonly Platform $platform = new Platform()
     ) {
+        $configContent = @file_get_contents($config);
+        if ($configContent === false) {
+            throw new RuntimeException(
+                'Unable to read config file: ' . $config
+            );
+        }
         /** @var Config $data */
         $data = json_decode(
-            file_get_contents($config) ?: '{}',
+            $configContent,
             true,
             512,
             JSON_THROW_ON_ERROR
