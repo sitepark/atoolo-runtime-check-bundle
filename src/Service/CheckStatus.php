@@ -43,11 +43,8 @@ class CheckStatus
      */
     public function addMessages(string $scope, array $messages): self
     {
-        if (!isset($this->messages[$scope])) {
-            $this->messages[$scope] = [];
-        }
         $this->messages[$scope] = array_merge(
-            $this->messages[$scope],
+            $this->messages[$scope] ?? [],
             $messages
         );
         return $this;
