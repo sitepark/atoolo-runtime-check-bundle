@@ -155,7 +155,7 @@ class MonologChecker implements Checker
                 return 'logfile cannot be created: ' . $file;
             }
         }
-        
+
         if (!is_writable($file)) {
             return 'logfile not writable: ' . $file;
         }
