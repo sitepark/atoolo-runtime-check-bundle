@@ -115,17 +115,17 @@ class MonologChecker implements Checker
         $fileSize = filesize($file) ?: 0;
         $reportData['logfile-size'] = $fileSize;
 
-        $rii = new RecursiveIteratorIterator(
+        $iterator = new RecursiveIteratorIterator(
             new RecursiveDirectoryIterator($dir)
         );
 
         $dirSize = 0;
-        /** @var SplFileInfo $f */
-        foreach ($rii as $f) {
-            if ($f->isDir()) {
+        /** @var SplFileInfo $fileInfo */
+        foreach ($iterator as $fileInfo) {
+            if ($fileInfo->isDir()) {
                 continue;
             }
-            $dirSize += $f->getSize() ?: 0;
+            $dirSize += $fileInfo->getSize() ?: 0;
         }
         $reportData['logdir-size'] = $dirSize;
 
