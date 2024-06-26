@@ -171,7 +171,7 @@ class MonologChecker implements Checker
     {
         $errors = [];
 
-        $maxLogFileSize = $this->toMemoryStringToInteger($this->maxLogFileSize);
+        $maxLogFileSize = $this->memoryStringToInteger($this->maxLogFileSize);
         if (
             $maxLogFileSize > 0
             && ($reportData['logfile-size'] ?? 0) > $maxLogFileSize
@@ -180,7 +180,7 @@ class MonologChecker implements Checker
                 . $this->maxLogFileSize . ' bytes';
         }
 
-        $maxLogDirSize = $this->toMemoryStringToInteger($this->maxLogDirSize);
+        $maxLogDirSize = $this->memoryStringToInteger($this->maxLogDirSize);
         if (
             $maxLogDirSize > 0
             && ($reportData['logdir-size'] ?? 0) > $maxLogDirSize
@@ -262,7 +262,7 @@ class MonologChecker implements Checker
         return $handlers;
     }
 
-    private function toMemoryStringToInteger(string $memory): int
+    private function memoryStringToInteger(string $memory): int
     {
         [$number, $suffix] = sscanf($memory, '%u%c') ?? [null, null];
         if (!is_string($suffix)) {
