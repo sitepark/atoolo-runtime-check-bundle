@@ -102,7 +102,12 @@ class PhpStatus
     private function getFpmPoolStatus(array $names): array
     {
         $status = $this->platform->getFpmPoolStatus();
-        return array_map(fn ($name) => $status[$name], $names);
+        /** @var array<string, mixed> $result */
+        $result = [];
+        foreach ($names as $name) {
+            $result[$name] = $status[$name];
+        }
+        return $result;
     }
 
     /**
@@ -180,6 +185,11 @@ class PhpStatus
     private function getOpcacheStatus(array $names): array
     {
         $status = $this->platform->getOpcacheGetStatus();
-        return array_map(fn ($name) => $status[$name], $names);
+        /** @var array<string, mixed> $result */
+        $result = [];
+        foreach ($names as $name) {
+            $result[$name] = $status[$name];
+        }
+        return $result;
     }
 }
