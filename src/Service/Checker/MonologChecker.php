@@ -253,11 +253,9 @@ class MonologChecker implements Checker
         $handlers = [];
         foreach ($logger->getHandlers() as $handler) {
             if ($handler instanceof FingersCrossedHandler) {
-                $nestedHandler = $handler->getHandler();
-                if ($nestedHandler instanceof StreamHandler) {
-                    $handlers[] = $nestedHandler;
-                }
-            } elseif ($handler instanceof StreamHandler) {
+                $handler = $handler->getHandler();
+            }
+            if ($handler instanceof StreamHandler) {
                 $handlers[] = $handler;
             }
         }

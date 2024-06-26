@@ -44,7 +44,7 @@ class PhpStatus
 
     public function getScope(): string
     {
-        return "php";
+        return 'php';
     }
 
     public function check(): CheckStatus
@@ -95,12 +95,7 @@ class PhpStatus
     private function getFpmPoolStatus(array $names): array
     {
         $status = $this->platform->getFpmPoolStatus();
-        /** @var array<string, mixed> $result */
-        $result = [];
-        foreach ($names as $name) {
-            $result[$name] = $status[$name];
-        }
-        return $result;
+        return array_map(fn ($name) => $status[$name], $names);
     }
 
     /**
@@ -167,10 +162,6 @@ class PhpStatus
     private function getOpcacheStatus(array $names): array
     {
         $status = $this->platform->getOpcacheGetStatus();
-        $result = [];
-        foreach ($names as $name) {
-            $result[$name] = $status[$name];
-        }
-        return $result;
+        return array_map(fn ($name) => $status[$name], $names);
     }
 }

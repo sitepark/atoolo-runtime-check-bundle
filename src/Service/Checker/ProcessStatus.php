@@ -20,7 +20,7 @@ class ProcessStatus implements Checker
 
     public function getScope(): string
     {
-        return "process";
+        return 'process';
     }
 
     public function check(): CheckStatus

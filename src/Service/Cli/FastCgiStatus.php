@@ -95,14 +95,11 @@ class FastCgiStatus
 
             $status = RuntimeStatus::deserialize($data)
                 ->getStatus(RuntimeType::FPM_FCGI);
-            if ($status === null) {
-                return CheckStatus::createFailure()
-                    ->addMessage(
-                        'fpm-fcgi',
-                        'No FastCGI status found in response.'
-                    );
-            }
-            return $status;
+            return $status ?? CheckStatus::createFailure()
+                ->addMessage(
+                    'fpm-fcgi',
+                    'No FastCGI status found in response.'
+                );
         } catch (Throwable $e) {
             return CheckStatus::createFailure()
                 ->addMessage(
