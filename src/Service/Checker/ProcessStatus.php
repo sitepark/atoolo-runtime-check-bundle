@@ -28,9 +28,9 @@ class ProcessStatus implements Checker
 
         $status = CheckStatus::createSuccess();
         $status->addReport($this->getScope(), [
-                'script' => $_SERVER['SCRIPT_FILENAME'] ?? 'n/a',
-                'user' => $this->platform->getUser(),
-                'group' => $this->platform->getGroup(),
+            'script' => $_SERVER['SCRIPT_FILENAME'] ?? 'n/a',
+            'user' => $this->platform->getUser(),
+            'group' => $this->platform->getGroup(),
         ]);
 
         return $status;
