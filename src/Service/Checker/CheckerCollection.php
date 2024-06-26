@@ -17,13 +17,13 @@ class CheckerCollection
     }
 
     /**
-     * @param array<string> $skip
+     * @param array<string> $scopesToSkip
      */
-    public function check(array $skip): CheckStatus
+    public function check(array $scopesToSkip = []): CheckStatus
     {
         $status = CheckStatus::createSuccess();
         foreach ($this->checkers as $checker) {
-            if (in_array($checker->getScope(), $skip, true)) {
+            if (in_array($checker->getScope(), $scopesToSkip, true)) {
                 continue;
             }
             $status->apply($checker->check());
