@@ -8,6 +8,7 @@ use Atoolo\Runtime\Check\Service\Checker\PhpStatus;
 use Atoolo\Runtime\Check\Service\Checker\ProcessStatus;
 use Atoolo\Runtime\Check\Service\CheckStatus;
 use Atoolo\Runtime\Check\Service\Platform;
+use JsonException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
@@ -92,6 +93,32 @@ class PhpStatusTest extends TestCase
         );
     }
 
+    public function testGetStatusUnreadablePhpFpmConf(): void
+    {
+        $this->expectException(RuntimeException::class);
+        $phpStatus = new PhpStatus(
+            $this->resourceDir . '/phpStatus-unreadable-php-fpm-conf.json',
+            'fpm-fcgi',
+            $this->platform
+        );
+        $phpStatus->check();
+    }
+
+    /**
+     * @throws JsonException
+     */
+    public function testGetStatusUnreadablePhpFpmConfInclude(): void
+    {
+        $this->expectException(RuntimeException::class);
+        $phpStatus = new PhpStatus(
+            $this->resourceDir
+            . '/phpStatus-unreadable-php-fpm-conf-include.json',
+            'fpm-fcgi',
+            $this->platform
+        );
+        $phpStatus->check();
+    }
+
     public function testGetStatusWithEmptyConfig(): void
     {
         $phpStatus = new PhpStatus(
@@ -123,6 +150,9 @@ class PhpStatusTest extends TestCase
         );
     }
 
+    /**
+     * @throws JsonException
+     */
     public function testGetStatusWithUnreadableConfig(): void
     {
         $this->expectException(RuntimeException::class);

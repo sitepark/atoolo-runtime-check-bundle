@@ -116,7 +116,12 @@ class PhpStatus
             return [];
         }
 
-        $globalConfig = parse_ini_file($fpmConfigFile, true) ?: [];
+        $globalConfig = @parse_ini_file($fpmConfigFile, true);
+        if ($globalConfig === false) {
+            throw new RuntimeException(
+                'Unable to parse FPM config file: ' . $fpmConfigFile
+            );
+        }
 
         $configs = [];
         if (isset($globalConfig['global']['include'])) {
@@ -126,7 +131,13 @@ class PhpStatus
             }
 
             foreach (glob($include) ?: [] as $file) {
-                $configs[] = parse_ini_file($file, true) ?: [];
+                $config = @parse_ini_file($file, true);
+                if ($config === false) {
+                    throw new RuntimeException(
+                        'Unable to parse FPM config file: ' . $file
+                    );
+                }
+                $configs[] = $config;
             }
         }
 
