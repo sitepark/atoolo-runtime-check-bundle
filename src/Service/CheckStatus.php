@@ -76,10 +76,7 @@ class CheckStatus
      */
     public function getReport(string $scope): array
     {
-        if (!isset($this->reports[$scope])) {
-            return [];
-        }
-        return $this->reports[$scope];
+        return $this->reports[$scope] ?? [];
     }
 
     /**
