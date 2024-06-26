@@ -9,6 +9,7 @@ use Atoolo\Runtime\Check\Service\CheckStatus;
 use Atoolo\Runtime\Check\Service\Platform;
 use DateTime;
 use JsonException;
+use RuntimeException;
 
 class WorkerStatusFile
 {
@@ -31,9 +32,16 @@ class WorkerStatusFile
 
         $toleranceInMinutes = $this->updatePeriodInMinutes / 2;
 
+        $workerStatusFileContent = @file_get_contents($this->workerStatusFile);
+        if ($workerStatusFileContent === false) {
+            throw new RuntimeException(
+                'Unable to read file ' . $this->workerStatusFile
+            );
+        }
+
         /** @var CheckStatusData $result */
         $result = json_decode(
-            file_get_contents($this->workerStatusFile) ?: '{}',
+            $workerStatusFileContent,
             true,
             512,
             JSON_THROW_ON_ERROR

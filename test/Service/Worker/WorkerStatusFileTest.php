@@ -11,6 +11,7 @@ use DateTime;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
 
 #[CoversClass(WorkerStatusFile::class)]
 class WorkerStatusFileTest extends TestCase
@@ -115,6 +116,25 @@ class WorkerStatusFileTest extends TestCase
             'Unexpected status'
         );
     }
+
+    public function testReadFileNotReadable(): void
+    {
+        $testFile = $this->testDir . '/not-readable';
+        touch($testFile);
+        chmod($testFile, 0000);
+        $this->expectException(RuntimeException::class);
+        try {
+            $statusFile = new WorkerStatusFile(
+                $testFile,
+                10,
+            );
+            $statusFile->read();
+        } finally {
+            chmod($testFile, 0777);
+            unlink($testFile);
+        }
+    }
+
 
     public function testReadFileLastRunExpired(): void
     {
