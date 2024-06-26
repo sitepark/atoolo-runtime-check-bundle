@@ -142,9 +142,6 @@ class MonologChecker implements Checker
         if ($file === null) {
             return'logfile not set';
         }
-        if (file_exists($file) && !is_writable($file)) {
-            return 'logfile not writable: ' . $file;
-        }
 
         if (!file_exists($file)) {
             $dir = dirname($file);
@@ -157,6 +154,10 @@ class MonologChecker implements Checker
             if (!@touch($file)) {
                 return 'logfile cannot be created: ' . $file;
             }
+        }
+        
+        if (!is_writable($file)) {
+            return 'logfile not writable: ' . $file;
         }
 
         return null;
