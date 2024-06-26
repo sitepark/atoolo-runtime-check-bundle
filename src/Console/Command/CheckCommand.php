@@ -29,19 +29,28 @@ final class CheckCommand extends Command
 
     protected function configure(): void
     {
+        $runtimeTypes = implode(
+            ', ',
+            array_map(
+                fn(RuntimeType $type) => $type->value,
+                RuntimeType::cases()
+            )
+        );
         $this
             ->setHelp('Command to performs a check of the runtime environment')
             ->addOption(
                 'skip',
                 null,
-                InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY,
-                'Skip check for different areas. E.g. for "fpm" .',
+                InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY,
+                'Skip check for different runtime-types'
+                . ' (' . $runtimeTypes . ')'
+                . ' and scopes (e.g. php, logging, ...)',
                 []
             )
             ->addOption(
                 'fpm-socket',
                 null,
-                InputOption::VALUE_OPTIONAL,
+                InputOption::VALUE_REQUIRED,
                 'fpm FastCGI socket like 127.0.0.1:9000 or '
                 . '/var/run/php/php8.3-fpm.sock'
             )
