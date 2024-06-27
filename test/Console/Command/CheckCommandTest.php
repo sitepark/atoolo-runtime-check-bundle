@@ -5,14 +5,10 @@ declare(strict_types=1);
 namespace Atoolo\Runtime\Check\Test\Console\Command;
 
 use Atoolo\Runtime\Check\Console\Command\CheckCommand;
-use Atoolo\Runtime\Check\Service\Checker\ProcessStatus;
 use Atoolo\Runtime\Check\Service\CheckStatus;
-use Atoolo\Runtime\Check\Service\Cli\FastCGIStatus;
-use Atoolo\Runtime\Check\Service\Cli\FastCgiStatusFactory;
 use Atoolo\Runtime\Check\Service\Cli\RuntimeCheck;
 use Atoolo\Runtime\Check\Service\RuntimeStatus;
 use Atoolo\Runtime\Check\Service\RuntimeType;
-use Atoolo\Runtime\Check\Service\Worker\WorkerStatusFile;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Tester\CommandTester;

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Atoolo\Runtime\Check\Service\Checker;
 
 use Atoolo\Runtime\Check\Service\CheckStatus;
-use Monolog\Handler\StreamHandler;
 use Monolog\Handler\FingersCrossedHandler;
+use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Psr\Log\LoggerInterface;
 use RecursiveDirectoryIterator;

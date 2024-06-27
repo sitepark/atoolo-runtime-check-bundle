@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Atoolo\Runtime\Check\Service\Worker;
 
-use Atoolo\Runtime\Check\Service\Checker\ProcessStatus;
 use Atoolo\Runtime\Check\Service\CheckStatus;
 use Atoolo\Runtime\Check\Service\Platform;
 use DateTime;

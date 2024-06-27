@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Atoolo\Runtime\Check\Service;
 
-use Psr\Log\LoggerInterface;
-
 /**
  * @codeCoverageIgnore
  */

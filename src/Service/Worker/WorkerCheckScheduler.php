@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Atoolo\Runtime\Check\Service\Worker;
 
 use Atoolo\Runtime\Check\Service\Checker\CheckerCollection;
-use Atoolo\Runtime\Check\Service\Checker\ProcessStatus;
 use JsonException;
 use Symfony\Component\Lock\LockFactory;
 use Symfony\Component\Lock\Store\SemaphoreStore;

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Atoolo\Runtime\Check\Test\Service\Checker;
 
 use Atoolo\Runtime\Check\Service\Checker\PhpStatus;
-use Atoolo\Runtime\Check\Service\Checker\ProcessStatus;
 use Atoolo\Runtime\Check\Service\CheckStatus;
 use Atoolo\Runtime\Check\Service\Platform;
 use JsonException;

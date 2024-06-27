@@ -5,9 +5,7 @@ declare(strict_types=1);
 namespace Atoolo\Runtime\Check\Test\Controller;
 
 use Atoolo\Runtime\Check\Controller\CheckController;
-use Atoolo\Runtime\Check\Service\Checker\ProcessStatus;
 use Atoolo\Runtime\Check\Service\CheckStatus;
-use Atoolo\Runtime\Check\Service\FpmFcgi\CliStatus;
 use Atoolo\Runtime\Check\Service\FpmFcgi\RuntimeCheck;
 use Atoolo\Runtime\Check\Service\RuntimeStatus;
 use Atoolo\Runtime\Check\Service\RuntimeType;
