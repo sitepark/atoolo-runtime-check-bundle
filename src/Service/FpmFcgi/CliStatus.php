@@ -15,9 +15,8 @@ class CliStatus
 {
     public function __construct(
         private readonly string $consoleBinPath,
-        private readonly string $resourceRoot
-    ) {
-    }
+        private readonly string $resourceRoot,
+    ) {}
 
     /**
      * @param array<string> $skip
@@ -34,13 +33,13 @@ class CliStatus
             'runtime:check',
             '--fail-on-error', 'false',
             '--skip', implode(',', $skip),
-            '--json'
+            '--json',
         ]);
         $process->setEnv(['RESOURCE_ROOT' => $this->resourceRoot]);
         try {
             $process->run();
-        // @codeCoverageIgnoreStart
-        // found no way to test this
+            // @codeCoverageIgnoreStart
+            // found no way to test this
         } catch (Exception $e) {
             return CheckStatus::createFailure()
                 ->addMessage('cli', trim($e->getMessage()));
@@ -57,7 +56,7 @@ class CliStatus
             $process->getOutput(),
             true,
             512,
-            JSON_THROW_ON_ERROR
+            JSON_THROW_ON_ERROR,
         );
         $status = RuntimeStatus::deserialize($data)
             ->getStatus(RuntimeType::CLI);

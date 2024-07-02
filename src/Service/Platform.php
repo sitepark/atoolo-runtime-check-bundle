@@ -17,13 +17,13 @@ class Platform
     public function getUser(): string
     {
         return (posix_getpwuid(posix_geteuid())
-            ?: ['name' => (string)posix_geteuid()])['name'];
+            ?: ['name' => (string) posix_geteuid()])['name'];
     }
 
     public function getGroup(): string
     {
         return (posix_getgrgid(posix_getegid())
-            ?: ['name' => (string)posix_getegid()])['name'];
+            ?: ['name' => (string) posix_getegid()])['name'];
     }
 
     /**

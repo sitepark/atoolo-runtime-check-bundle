@@ -22,7 +22,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 final class CheckCommand extends Command
 {
     public function __construct(
-        private readonly RuntimeCheck $runtimeCheck
+        private readonly RuntimeCheck $runtimeCheck,
     ) {
         parent::__construct();
     }
@@ -33,8 +33,8 @@ final class CheckCommand extends Command
             ', ',
             array_map(
                 fn(RuntimeType $type) => $type->value,
-                RuntimeType::cases()
-            )
+                RuntimeType::cases(),
+            ),
         );
         $this
             ->setHelp('Command to performs a check of the runtime environment')
@@ -45,28 +45,28 @@ final class CheckCommand extends Command
                 'Skip check for different runtime-types'
                 . ' (' . $runtimeTypes . ')'
                 . ' and scopes (e.g. php, logging, ...)',
-                []
+                [],
             )
             ->addOption(
                 'fpm-socket',
                 null,
                 InputOption::VALUE_REQUIRED,
                 'fpm FastCGI socket like 127.0.0.1:9000 or '
-                . '/var/run/php/php8.3-fpm.sock'
+                . '/var/run/php/php8.3-fpm.sock',
             )
             ->addOption(
                 'fail-on-error',
                 null,
                 InputOption::VALUE_OPTIONAL,
                 'returns the exit code 1 if an error occurs',
-                true
+                true,
             )
             ->addOption(
                 'json',
                 null,
                 InputOption::VALUE_NEGATABLE,
                 'output result in json.',
-                false
+                false,
             )
         ;
     }
@@ -76,20 +76,20 @@ final class CheckCommand extends Command
      */
     protected function execute(
         InputInterface $input,
-        OutputInterface $output
+        OutputInterface $output,
     ): int {
 
         $typedInput = new TypifiedInput($input);
 
         $runtimeStatus = $this->runtimeCheck->execute(
             $typedInput->getArrayOption('skip'),
-            $typedInput->getStringOption('fpm-socket')
+            $typedInput->getStringOption('fpm-socket'),
         );
 
         $this->outputResults(
             $output,
             $runtimeStatus,
-            $typedInput->getBoolOption('json')
+            $typedInput->getBoolOption('json'),
         );
 
         $failOnError = $typedInput->getBoolOption('fail-on-error');
@@ -104,7 +104,7 @@ final class CheckCommand extends Command
     private function outputResults(
         OutputInterface $output,
         RuntimeStatus $runtimeStatus,
-        bool $json
+        bool $json,
     ): void {
         if ($json) {
             $output->writeln(
@@ -112,8 +112,8 @@ final class CheckCommand extends Command
                     $runtimeStatus->serialize(),
                     JSON_THROW_ON_ERROR
                     | JSON_PRETTY_PRINT
-                    | JSON_UNESCAPED_SLASHES
-                )
+                    | JSON_UNESCAPED_SLASHES,
+                ),
             );
         } else {
             foreach (RuntimeType::cases() as $type) {
@@ -126,14 +126,14 @@ final class CheckCommand extends Command
                         $value,
                         JSON_THROW_ON_ERROR
                         | JSON_PRETTY_PRINT
-                        | JSON_UNESCAPED_SLASHES
+                        | JSON_UNESCAPED_SLASHES,
                     );
                     $output->writeln(
                         '<info>'
                         . $type->value
                         . '/'
                         . $scope
-                        . '</info>'
+                        . '</info>',
                     );
                     $output->writeln($value);
                     $output->writeln('');

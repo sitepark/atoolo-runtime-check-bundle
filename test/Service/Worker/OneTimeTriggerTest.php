@@ -17,7 +17,7 @@ class OneTimeTriggerTest extends TestCase
 
         $this->assertEquals(
             'one time',
-            (string) $trigger
+            (string) $trigger,
         );
     }
 
@@ -28,7 +28,7 @@ class OneTimeTriggerTest extends TestCase
 
         $this->assertEquals(
             'one time (already running)',
-            (string) $trigger
+            (string) $trigger,
         );
     }
 
@@ -40,7 +40,7 @@ class OneTimeTriggerTest extends TestCase
         $this->assertEquals(
             $run,
             $trigger->getNextRunDate($run),
-            'The first call to getNextRunDate should return the same date'
+            'The first call to getNextRunDate should return the same date',
         );
     }
 
@@ -52,7 +52,7 @@ class OneTimeTriggerTest extends TestCase
 
         $this->assertNull(
             $trigger->getNextRunDate($run),
-            'The second call to getNextRunDate should return null'
+            'The second call to getNextRunDate should return null',
         );
     }
 }

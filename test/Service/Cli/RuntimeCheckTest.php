@@ -47,7 +47,7 @@ class RuntimeCheckTest extends TestCase
         $runtimeCheck = new RuntimeCheck(
             $checkerCollection,
             $fastCgiStatusFactory,
-            $workerStatusFile
+            $workerStatusFile,
         );
         $runtimeStatus = $runtimeCheck->execute([], null);
 
@@ -59,7 +59,7 @@ class RuntimeCheckTest extends TestCase
         $this->assertEquals(
             $expected,
             $runtimeStatus,
-            'Runtime status is not as expected'
+            'Runtime status is not as expected',
         );
     }
 
@@ -75,7 +75,7 @@ class RuntimeCheckTest extends TestCase
         $runtimeCheck = new RuntimeCheck(
             $checkerCollection,
             $fastCgiStatusFactory,
-            $workerStatusFile
+            $workerStatusFile,
         );
         $runtimeStatus = $runtimeCheck->execute([
             RuntimeType::CLI->value,
@@ -88,7 +88,7 @@ class RuntimeCheckTest extends TestCase
         $this->assertEquals(
             $expected,
             $runtimeStatus,
-            'Runtime status is not as expected'
+            'Runtime status is not as expected',
         );
     }
 }

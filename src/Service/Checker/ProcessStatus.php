@@ -13,9 +13,8 @@ class ProcessStatus implements Checker
      * @throws \JsonException
      */
     public function __construct(
-        private readonly Platform $platform = new Platform()
-    ) {
-    }
+        private readonly Platform $platform = new Platform(),
+    ) {}
 
 
     public function getScope(): string

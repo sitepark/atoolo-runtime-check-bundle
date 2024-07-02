@@ -32,19 +32,19 @@ class PhpStatusTest extends TestCase
             ->willReturn('php.ini');
         $this->platform->method('getIni')
             ->willReturnMap([
-                ['date.timezone', 'Timezone']
+                ['date.timezone', 'Timezone'],
             ]);
         $this->platform->method('getVersion')
             ->willReturn('8.3.0');
         $this->platform->method('getOpcacheGetStatus')
             ->willReturn([
                 'memory_usage' => '123',
-                'other' => 'test'
+                'other' => 'test',
             ]);
         $this->platform->method('getFpmPoolStatus')
             ->willReturn([
                 'pool' => 'www',
-                'other' => 'test'
+                'other' => 'test',
             ]);
     }
 
@@ -56,7 +56,7 @@ class PhpStatusTest extends TestCase
         $phpStatus = new PhpStatus(
             $this->resourceDir . '/phpStatus.json',
             'fpm-fcgi',
-            $this->platform
+            $this->platform,
         );
         $status = $phpStatus->check();
 
@@ -65,30 +65,30 @@ class PhpStatusTest extends TestCase
             'version' => '8.3.0',
             'ini' => [
                 'file' => 'php.ini',
-                'date.timezone' => 'Timezone'
+                'date.timezone' => 'Timezone',
             ],
             'fpm' => [
                 'config' => [
                     'section' => [
                         'key' => 'value',
-                        'includetest' => 'test'
+                        'includetest' => 'test',
                     ],
                     'global' => [
-                        'include' => 'fpm/conf.d/*.conf'
-                    ]
+                        'include' => 'fpm/conf.d/*.conf',
+                    ],
                 ],
                 'status' => [
-                    'pool' => 'www'
-                ]
+                    'pool' => 'www',
+                ],
             ],
             'opcache' => [
-                'memory_usage' => '123'
-            ]
+                'memory_usage' => '123',
+            ],
         ]);
         $this->assertEquals(
             $expected,
             $status,
-            'Unexpected status'
+            'Unexpected status',
         );
     }
 
@@ -98,7 +98,7 @@ class PhpStatusTest extends TestCase
         $phpStatus = new PhpStatus(
             $this->resourceDir . '/phpStatus-unreadable-php-fpm-conf.json',
             'fpm-fcgi',
-            $this->platform
+            $this->platform,
         );
         $phpStatus->check();
     }
@@ -113,7 +113,7 @@ class PhpStatusTest extends TestCase
             $this->resourceDir
             . '/phpStatus-unreadable-php-fpm-conf-include.json',
             'fpm-fcgi',
-            $this->platform
+            $this->platform,
         );
         $phpStatus->check();
     }
@@ -123,7 +123,7 @@ class PhpStatusTest extends TestCase
         $phpStatus = new PhpStatus(
             $this->resourceDir . '/empty-phpStatus.json',
             'fpm-fcgi',
-            $this->platform
+            $this->platform,
         );
         $status = $phpStatus->check();
         $expected = CheckStatus::createSuccess();
@@ -136,16 +136,16 @@ class PhpStatusTest extends TestCase
                 'config' => [
                 ],
                 'status' => [
-                ]
+                ],
             ],
             'opcache' => [
-            ]
+            ],
         ]);
 
         $this->assertEquals(
             $expected,
             $status,
-            'Unexpected status'
+            'Unexpected status',
         );
     }
 
@@ -158,7 +158,7 @@ class PhpStatusTest extends TestCase
         new PhpStatus(
             $this->resourceDir . '/non-exists-phpStatus.json',
             'fpm-fcgi',
-            $this->platform
+            $this->platform,
         );
     }
 }

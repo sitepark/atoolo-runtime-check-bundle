@@ -15,9 +15,8 @@ class WorkerStatusFile
     public function __construct(
         private readonly string $workerStatusFile,
         public readonly int $updatePeriodInMinutes,
-        private readonly Platform $platform = new Platform()
-    ) {
-    }
+        private readonly Platform $platform = new Platform(),
+    ) {}
 
     /**
      * @throws JsonException
@@ -34,7 +33,7 @@ class WorkerStatusFile
         $workerStatusFileContent = @file_get_contents($this->workerStatusFile);
         if ($workerStatusFileContent === false) {
             throw new RuntimeException(
-                'Unable to read file ' . $this->workerStatusFile
+                'Unable to read file ' . $this->workerStatusFile,
             );
         }
 
@@ -43,7 +42,7 @@ class WorkerStatusFile
             $workerStatusFileContent,
             true,
             512,
-            JSON_THROW_ON_ERROR
+            JSON_THROW_ON_ERROR,
         );
 
         $allowedTime =
@@ -62,7 +61,7 @@ class WorkerStatusFile
                 $checkStatus
                     ->replaceReport(
                         'scheduler',
-                        $result['reports']['scheduler']
+                        $result['reports']['scheduler'],
                     );
             }
             $checkStatus
@@ -71,7 +70,7 @@ class WorkerStatusFile
                     'The worker did not run in the last '
                     . $this->updatePeriodInMinutes
                     . ' minutes. Last run: '
-                    . $formattedLastRun
+                    . $formattedLastRun,
                 );
         }
 
@@ -92,15 +91,15 @@ class WorkerStatusFile
             ]);
         }
         $status->addReport('scheduler', [
-            'last-run' => $now->format('d.m.Y H:i:s')
+            'last-run' => $now->format('d.m.Y H:i:s'),
         ]);
 
         file_put_contents(
             $this->workerStatusFile,
             json_encode(
                 $status->serialize(),
-                JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR
-            )
+                JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR,
+            ),
         );
     }
 }

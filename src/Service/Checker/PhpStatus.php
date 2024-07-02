@@ -31,12 +31,12 @@ class PhpStatus
     public function __construct(
         string $config = __DIR__ . '/phpStatus.json',
         private readonly string $sapi = PHP_SAPI,
-        private readonly Platform $platform = new Platform()
+        private readonly Platform $platform = new Platform(),
     ) {
         $configContent = @file_get_contents($config);
         if ($configContent === false) {
             throw new RuntimeException(
-                'Unable to read config file: ' . $config
+                'Unable to read config file: ' . $config,
             );
         }
         /** @var Config $data */
@@ -44,7 +44,7 @@ class PhpStatus
             $configContent,
             true,
             512,
-            JSON_THROW_ON_ERROR
+            JSON_THROW_ON_ERROR,
         );
         $this->config = $data;
     }
@@ -58,20 +58,20 @@ class PhpStatus
     {
         $report = [
             'version' => $this->platform->getVersion(),
-            'ini' => $this->getIniSettings($this->config['ini'] ?? [])
+            'ini' => $this->getIniSettings($this->config['ini'] ?? []),
         ];
 
         if ($this->sapi === 'fpm-fcgi') {
             $fpm = [];
             $fpm['config'] = $this->getFpmConfig(
-                $this->config['fpm']['configDirs'] ?? []
+                $this->config['fpm']['configDirs'] ?? [],
             );
             $fpm['status'] = $this->getFpmPoolStatus(
-                $this->config['fpm']['status'] ?? []
+                $this->config['fpm']['status'] ?? [],
             );
             $report['fpm'] = $fpm;
             $report['opcache'] = $this->getOpcacheStatus(
-                $this->config['opcache'] ?? []
+                $this->config['opcache'] ?? [],
             );
         }
 
@@ -87,7 +87,7 @@ class PhpStatus
     private function getIniSettings(array $names): array
     {
         $result = [
-            'file' => $this->platform->getPhpIniLoadedFile()
+            'file' => $this->platform->getPhpIniLoadedFile(),
         ];
         foreach ($names as $name) {
             $result[$name] = $this->platform->getIni($name);
@@ -124,7 +124,7 @@ class PhpStatus
         $globalConfig = @parse_ini_file($fpmConfigFile, true);
         if ($globalConfig === false) {
             throw new RuntimeException(
-                'Unable to parse FPM config file: ' . $fpmConfigFile
+                'Unable to parse FPM config file: ' . $fpmConfigFile,
             );
         }
 
@@ -139,7 +139,7 @@ class PhpStatus
                 $config = @parse_ini_file($file, true);
                 if ($config === false) {
                     throw new RuntimeException(
-                        'Unable to parse FPM config file: ' . $file
+                        'Unable to parse FPM config file: ' . $file,
                     );
                 }
                 $configs[] = $config;
@@ -160,14 +160,14 @@ class PhpStatus
                 [
                     '{PHP_VERSION_MAJOR}',
                     '{PHP_VERSION_MINOR}',
-                    '{PHP_VERSION_PATCH}'
+                    '{PHP_VERSION_PATCH}',
                 ],
                 [
                     $version[0],
                     $version[1],
-                    $version[2]
+                    $version[2],
                 ],
-                $configDir
+                $configDir,
             );
             $iniFilePath = $configDir . '/php-fpm.conf';
             if (file_exists($iniFilePath)) {

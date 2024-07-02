@@ -17,8 +17,7 @@ class RuntimeCheck
         private readonly CheckerCollection $checkerCollection,
         private readonly CliStatus $cliStatus,
         private readonly WorkerStatusFile $workerStatusFile,
-    ) {
-    }
+    ) {}
 
     /**
      * @param array<string> $skip
@@ -30,19 +29,19 @@ class RuntimeCheck
         if (!in_array(RuntimeType::FPM_FCGI->value, $skip, true)) {
             $runtimeStatus->addStatus(
                 RuntimeType::FPM_FCGI,
-                $this->getFpmFcgiStatus($skip)
+                $this->getFpmFcgiStatus($skip),
             );
         }
         if (!in_array(RuntimeType::CLI->value, $skip, true)) {
             $runtimeStatus->addStatus(
                 RuntimeType::CLI,
-                $this->getCliStatus($skip)
+                $this->getCliStatus($skip),
             );
         }
         if (!in_array(RuntimeType::WORKER->value, $skip, true)) {
             $runtimeStatus->addStatus(
                 RuntimeType::WORKER,
-                $this->getWorkerStatus($skip)
+                $this->getWorkerStatus($skip),
             );
         }
 
@@ -53,11 +52,11 @@ class RuntimeCheck
      * @param array<string> $skip
      */
     private function getFpmFcgiStatus(
-        array $skip
+        array $skip,
     ): CheckStatus {
         $status = $this->checkerCollection->check($skip);
         $status->addReport('server', [
-            'host' => $_SERVER['SERVER_NAME'] ?? 'unknown'
+            'host' => $_SERVER['SERVER_NAME'] ?? 'unknown',
         ]);
         return $status;
     }

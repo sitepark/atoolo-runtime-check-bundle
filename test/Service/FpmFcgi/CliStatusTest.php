@@ -20,7 +20,7 @@ class CliStatusTest extends TestCase
         $checkStatus = $cliStatus->execute([]);
         $this->assertTrue(
             $checkStatus->success,
-            'CheckStatus should be successful'
+            'CheckStatus should be successful',
         );
     }
 
@@ -31,7 +31,7 @@ class CliStatusTest extends TestCase
         $checkStatus = $cliStatus->execute([]);
         $this->assertFalse(
             $checkStatus->success,
-            'CheckStatus should not be successful'
+            'CheckStatus should not be successful',
         );
     }
 
@@ -42,7 +42,7 @@ class CliStatusTest extends TestCase
         $checkStatus = $cliStatus->execute([]);
         $this->assertFalse(
             $checkStatus->success,
-            'CheckStatus should be successful'
+            'CheckStatus should be successful',
         );
     }
 }

@@ -23,7 +23,7 @@ class CheckCommandTest extends TestCase
     public function setUp(): void
     {
         $this->runtimeCheck = $this->createStub(
-            RuntimeCheck::class
+            RuntimeCheck::class,
         );
 
         $command = new CheckCommand(
@@ -40,7 +40,7 @@ class CheckCommandTest extends TestCase
         $runtimeStatus = new RuntimeStatus();
         $runtimeStatus->addStatus(RuntimeType::CLI, $checkStatus);
         $this->runtimeCheck->method('execute')->willReturn(
-            $runtimeStatus
+            $runtimeStatus,
         );
 
         $this->commandTester->execute([]);
@@ -55,7 +55,7 @@ Success
 
 EOF,
             $this->commandTester->getDisplay(),
-            'Command should display failure message'
+            'Command should display failure message',
         );
     }
 
@@ -68,7 +68,7 @@ EOF,
         $runtimeStatus->addStatus(RuntimeType::CLI, $status);
 
         $this->runtimeCheck->method('execute')->willReturn(
-            $runtimeStatus
+            $runtimeStatus,
         );
 
         $this->commandTester->execute([]);
@@ -79,7 +79,7 @@ cli/test: test message
 
 EOF,
             $this->commandTester->getDisplay(),
-            'Command should display failure message'
+            'Command should display failure message',
         );
     }
 
@@ -90,11 +90,11 @@ EOF,
         $runtimeStatus = new RuntimeStatus();
         $runtimeStatus->addStatus(RuntimeType::CLI, $checkStatus);
         $this->runtimeCheck->method('execute')->willReturn(
-            $runtimeStatus
+            $runtimeStatus,
         );
 
         $this->commandTester->execute(
-            ['--json' => true]
+            ['--json' => true],
         );
         $this->assertEquals(
             <<<EOF
@@ -112,7 +112,7 @@ EOF,
 
 EOF,
             $this->commandTester->getDisplay(),
-            'Command should display json result'
+            'Command should display json result',
         );
     }
 }

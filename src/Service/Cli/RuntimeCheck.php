@@ -16,8 +16,7 @@ class RuntimeCheck
         private readonly CheckerCollection $checkerCollection,
         private readonly FastCgiStatusFactory $fastCgiStatusFactory,
         private readonly WorkerStatusFile $workerStatusFile,
-    ) {
-    }
+    ) {}
 
     /**
      * @param array<string> $skip
@@ -28,19 +27,19 @@ class RuntimeCheck
         if (!in_array(RuntimeType::CLI->value, $skip, true)) {
             $runtimeStatus->addStatus(
                 RuntimeType::CLI,
-                $this->getCliStatus($skip)
+                $this->getCliStatus($skip),
             );
         }
         if (!in_array(RuntimeType::FPM_FCGI->value, $skip, true)) {
             $runtimeStatus->addStatus(
                 RuntimeType::FPM_FCGI,
-                $this->getFpmFcgiStatus($skip, $fpmSocket)
+                $this->getFpmFcgiStatus($skip, $fpmSocket),
             );
         }
         if (!in_array(RuntimeType::WORKER->value, $skip, true)) {
             $runtimeStatus->addStatus(
                 RuntimeType::WORKER,
-                $this->getWorkerStatus($skip)
+                $this->getWorkerStatus($skip),
             );
         }
 
@@ -60,7 +59,7 @@ class RuntimeCheck
      */
     private function getFpmFcgiStatus(
         array $skip,
-        ?string $fpmSocket
+        ?string $fpmSocket,
     ): CheckStatus {
         $fastCgi = $this->fastCgiStatusFactory->create($fpmSocket);
         return $fastCgi->request($skip);

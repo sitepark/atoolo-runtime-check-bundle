@@ -17,7 +17,7 @@ class CheckerCollectionTest extends TestCase
     {
         $checkerA = $this->createStub(Checker::class);
         $checkerA->method('check')->willReturn(
-            CheckStatus::createSuccess()->addReport('a', ['a' => 'b'])
+            CheckStatus::createSuccess()->addReport('a', ['a' => 'b']),
         );
         $checkerA->method('getScope')->willReturn('a');
 
@@ -30,7 +30,7 @@ class CheckerCollectionTest extends TestCase
         $this->assertEquals(
             $expected,
             $status,
-            'Status is not as expected'
+            'Status is not as expected',
         );
     }
 
@@ -38,7 +38,7 @@ class CheckerCollectionTest extends TestCase
     {
         $checker = $this->createStub(Checker::class);
         $checker->method('check')->willReturn(
-            CheckStatus::createSuccess()->addReport('a', ['a' => 'b'])
+            CheckStatus::createSuccess()->addReport('a', ['a' => 'b']),
         );
         $checker->method('getScope')->willReturn('a');
 
@@ -50,7 +50,7 @@ class CheckerCollectionTest extends TestCase
         $this->assertEquals(
             $expected,
             $status,
-            'checker should be skipped'
+            'checker should be skipped',
         );
     }
 }

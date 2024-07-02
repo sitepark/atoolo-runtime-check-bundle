@@ -26,7 +26,7 @@ class FastCGIStatusTest extends TestCase
     {
         $this->client = $this->createMock(Client::class);
         $this->connection = $this->createMock(
-            ConfiguresSocketConnection::class
+            ConfiguresSocketConnection::class,
         );
         $this->response = $this->createStub(ProvidesResponseData::class);
 
@@ -36,7 +36,7 @@ class FastCGIStatusTest extends TestCase
             $this->connection,
             '/path/to/front-controller',
             '',
-            ''
+            '',
         );
     }
 
@@ -49,10 +49,10 @@ class FastCGIStatusTest extends TestCase
                     'success' => true,
                     'reports' => [
                         'test' => [
-                            'a' => 'b'
-                        ]
-                    ]
-                ]
+                            'a' => 'b',
+                        ],
+                    ],
+                ],
             ], JSON_THROW_ON_ERROR));
         $this->client->method('sendRequest')
             ->willReturn($this->response);
@@ -62,13 +62,13 @@ class FastCGIStatusTest extends TestCase
 
         $expected = CheckStatus::createSuccess();
         $expected->addReport('test', [
-            'a' => 'b'
+            'a' => 'b',
         ]);
 
         $this->assertEquals(
             $expected,
             $status,
-            'Unexpected CheckStatus'
+            'Unexpected CheckStatus',
         );
     }
 
@@ -86,13 +86,13 @@ class FastCGIStatusTest extends TestCase
         $expected = CheckStatus::createFailure();
         $expected->addMessage(
             'fpm-fcgi',
-            'No FastCGI status found in response.'
+            'No FastCGI status found in response.',
         );
 
         $this->assertEquals(
             $expected,
             $status,
-            'Unexpected CheckStatus'
+            'Unexpected CheckStatus',
         );
     }
     public function testRequestWithInvalidJson(): void
@@ -107,13 +107,13 @@ class FastCGIStatusTest extends TestCase
         $expected = CheckStatus::createFailure();
         $expected->addMessage(
             'fpm-fcgi',
-            "JSON error: Syntax error\ninvalid-json"
+            "JSON error: Syntax error\ninvalid-json",
         );
 
         $this->assertEquals(
             $expected,
             $status,
-            'Unexpected CheckStatus'
+            'Unexpected CheckStatus',
         );
     }
 
@@ -127,13 +127,13 @@ class FastCGIStatusTest extends TestCase
         $expected = CheckStatus::createFailure();
         $expected->addMessage(
             'fpm-fcgi',
-            'FastCGI error: error (mysocket)'
+            'FastCGI error: error (mysocket)',
         );
 
         $this->assertEquals(
             $expected,
             $status,
-            'Unexpected CheckStatus'
+            'Unexpected CheckStatus',
         );
     }
 }

@@ -17,7 +17,7 @@ class RuntimeTypeTest extends TestCase
         $this->assertEquals(
             [RuntimeType::FPM_FCGI, RuntimeType::WORKER],
             $cases,
-            'Cases are not as expected'
+            'Cases are not as expected',
         );
     }
 }

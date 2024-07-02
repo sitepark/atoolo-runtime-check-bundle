@@ -36,7 +36,7 @@ class ProcessStatusTest extends TestCase
     public function testGetStatus(): void
     {
         $processStatus = new ProcessStatus(
-            $this->platform
+            $this->platform,
         );
         $status = $processStatus->check();
 
@@ -49,7 +49,7 @@ class ProcessStatusTest extends TestCase
         $this->assertEquals(
             $expected,
             $status,
-            'Unexpected status'
+            'Unexpected status',
         );
     }
 }

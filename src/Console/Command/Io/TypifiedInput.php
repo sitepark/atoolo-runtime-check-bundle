@@ -13,9 +13,7 @@ use Symfony\Component\Console\Input\InputInterface;
  */
 class TypifiedInput
 {
-    public function __construct(private readonly InputInterface $input)
-    {
-    }
+    public function __construct(private readonly InputInterface $input) {}
 
     public function getStringOption(string $name): ?string
     {
@@ -25,7 +23,7 @@ class TypifiedInput
         }
         if (!is_string($value)) {
             throw new InvalidArgumentException(
-                'option ' . $name . ' must be a string: ' . $value
+                'option ' . $name . ' must be a string: ' . $value,
             );
         }
         return $value;
@@ -42,7 +40,7 @@ class TypifiedInput
         }
         if (!is_array($value)) {
             throw new InvalidArgumentException(
-                'option ' . $name . ' must be a array: ' . $value
+                'option ' . $name . ' must be a array: ' . $value,
             );
         }
         return $value;
