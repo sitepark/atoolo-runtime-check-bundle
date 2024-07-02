@@ -38,7 +38,7 @@ class RuntimeCheckTest extends TestCase
         $runtimeCheck = new RuntimeCheck(
             $checkerCollection,
             $cliStatus,
-            $workerStatusFile
+            $workerStatusFile,
         );
         $runtimeStatus = $runtimeCheck->execute([]);
 
@@ -50,7 +50,7 @@ class RuntimeCheckTest extends TestCase
         $this->assertEquals(
             $expected,
             $runtimeStatus,
-            'Runtime status is not as expected'
+            'Runtime status is not as expected',
         );
     }
 
@@ -63,7 +63,7 @@ class RuntimeCheckTest extends TestCase
         $runtimeCheck = new RuntimeCheck(
             $checkerCollection,
             $cliStatus,
-            $workerStatusFile
+            $workerStatusFile,
         );
         $runtimeStatus = $runtimeCheck->execute([
             RuntimeType::FPM_FCGI->value,
@@ -76,7 +76,7 @@ class RuntimeCheckTest extends TestCase
         $this->assertEquals(
             $expected,
             $runtimeStatus,
-            'Runtime status is not as expected'
+            'Runtime status is not as expected',
         );
     }
 }

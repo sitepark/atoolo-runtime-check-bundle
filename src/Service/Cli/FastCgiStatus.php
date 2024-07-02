@@ -24,9 +24,8 @@ class FastCgiStatus
         private readonly ConfiguresSocketConnection $connection,
         private readonly string $frontControllerPath,
         private readonly string $resourceRoot,
-        private readonly string $resourceHost
-    ) {
-    }
+        private readonly string $resourceHost,
+    ) {}
 
     /**
      * @internal For testing purposes only
@@ -63,13 +62,13 @@ class FastCgiStatus
         $request->setCustomVar('RESOURCE_ROOT', $this->resourceRoot);
         $request->setCustomVar(
             'DOCUMENT_ROOT',
-            dirname($this->frontControllerPath)
+            dirname($this->frontControllerPath),
         );
 
         try {
             $res =  $this->client->sendRequest(
                 $this->connection,
-                $request
+                $request,
             );
 
             $body = $res->getBody();
@@ -79,7 +78,7 @@ class FastCgiStatus
                     $body,
                     true,
                     512,
-                    JSON_THROW_ON_ERROR
+                    JSON_THROW_ON_ERROR,
                 );
             } catch (JsonException $e) {
                 return CheckStatus::createFailure()
@@ -88,8 +87,8 @@ class FastCgiStatus
                         sprintf(
                             "JSON error: %s\n%s",
                             $e->getMessage(),
-                            $body
-                        )
+                            $body,
+                        ),
                     );
             }
 
@@ -98,7 +97,7 @@ class FastCgiStatus
             return $status ?? CheckStatus::createFailure()
                 ->addMessage(
                     'fpm-fcgi',
-                    'No FastCGI status found in response.'
+                    'No FastCGI status found in response.',
                 );
         } catch (Throwable $e) {
             return CheckStatus::createFailure()
@@ -107,8 +106,8 @@ class FastCgiStatus
                     sprintf(
                         'FastCGI error: %s (%s)',
                         $e->getMessage(),
-                        $this->socket
-                    )
+                        $this->socket,
+                    ),
                 );
         }
     }

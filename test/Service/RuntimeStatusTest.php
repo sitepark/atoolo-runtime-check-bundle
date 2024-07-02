@@ -23,7 +23,7 @@ class RuntimeStatusTest extends TestCase
         $this->assertEquals(
             $checkStatus,
             $runtimeStatus->getStatus(RuntimeType::CLI),
-            'Status is not as expected'
+            'Status is not as expected',
         );
     }
 
@@ -32,17 +32,17 @@ class RuntimeStatusTest extends TestCase
         $runtimeStatus = new RuntimeStatus();
         $runtimeStatus->addStatus(
             RuntimeType::CLI,
-            CheckStatus::createSuccess()
+            CheckStatus::createSuccess(),
         );
         $runtimeStatus->addStatus(
             RuntimeType::WORKER,
-            CheckStatus::createSuccess()
+            CheckStatus::createSuccess(),
         );
 
         $this->assertEquals(
             [RuntimeType::CLI, RuntimeType::WORKER],
             $runtimeStatus->getTypes(),
-            'Unexpected types'
+            'Unexpected types',
         );
     }
 
@@ -51,12 +51,12 @@ class RuntimeStatusTest extends TestCase
         $runtimeStatus = new RuntimeStatus();
         $runtimeStatus->addStatus(
             RuntimeType::CLI,
-            CheckStatus::createSuccess()
+            CheckStatus::createSuccess(),
         );
 
         $this->assertTrue(
             $runtimeStatus->isSuccess(),
-            'Status should be successful'
+            'Status should be successful',
         );
     }
 
@@ -65,16 +65,16 @@ class RuntimeStatusTest extends TestCase
         $runtimeStatus = new RuntimeStatus();
         $runtimeStatus->addStatus(
             RuntimeType::CLI,
-            CheckStatus::createSuccess()
+            CheckStatus::createSuccess(),
         );
         $runtimeStatus->addStatus(
             RuntimeType::WORKER,
-            CheckStatus::createFailure()
+            CheckStatus::createFailure(),
         );
 
         $this->assertFalse(
             $runtimeStatus->isSuccess(),
-            'Status should not be successful'
+            'Status should not be successful',
         );
     }
 
@@ -88,7 +88,7 @@ class RuntimeStatusTest extends TestCase
         $this->assertEquals(
             ['cli/test: message'],
             $runtimeStatus->getMessages(),
-            'Messages are not as expected'
+            'Messages are not as expected',
         );
     }
 
@@ -108,10 +108,10 @@ class RuntimeStatusTest extends TestCase
                     'messages' => ['test' => ['message']],
                 ],
                 'success' => true,
-                'messages' => ['cli/test: message']
+                'messages' => ['cli/test: message'],
             ],
             $runtimeStatus->serialize(),
-            'Status is not as expected'
+            'Status is not as expected',
         );
     }
 
@@ -124,7 +124,7 @@ class RuntimeStatusTest extends TestCase
                 'messages' => ['test' => ['message']],
             ],
             'success' => true,
-            'messages' => ['cli/test: message']
+            'messages' => ['cli/test: message'],
         ];
 
         $checkStatus = CheckStatus::createSuccess()
@@ -136,7 +136,7 @@ class RuntimeStatusTest extends TestCase
         $this->assertEquals(
             $expected,
             RuntimeStatus::deserialize($data),
-            'Status is not as expected'
+            'Status is not as expected',
         );
     }
 }

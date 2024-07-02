@@ -34,13 +34,13 @@ class CheckControllerTest extends TestCase
     {
         $checkStatus = CheckStatus::createSuccess();
         $checkStatus->addReport('test', [
-            'a' => 'b'
+            'a' => 'b',
         ]);
         $runtimeStatus = new RuntimeStatus();
         $runtimeStatus->addStatus(RuntimeType::CLI, $checkStatus);
 
         $this->runtimeCheck->method('execute')->willReturn(
-            $runtimeStatus
+            $runtimeStatus,
         );
 
         $request = $this->createMock(Request::class);
@@ -49,7 +49,7 @@ class CheckControllerTest extends TestCase
             $response->getContent(),
             true,
             512,
-            JSON_THROW_ON_ERROR
+            JSON_THROW_ON_ERROR,
         );
         $this->assertEquals(
             [
@@ -57,14 +57,14 @@ class CheckControllerTest extends TestCase
                 'cli' => [
                     'reports' => [
                         'test' => [
-                            'a' => 'b'
-                        ]
+                            'a' => 'b',
+                        ],
                     ],
-                    'success' => true
-                ]
+                    'success' => true,
+                ],
             ],
             $json,
-            'Unexpected response content'
+            'Unexpected response content',
         );
     }
 
@@ -79,15 +79,15 @@ class CheckControllerTest extends TestCase
             ->with(
                 [
                     RuntimeType::CLI->value,
-                ]
+                ],
             );
         $request = $this->createMock(Request::class);
         $request->method('get')
             ->with('skip')
             ->willReturn(
                 [
-                    RuntimeType::CLI->value
-                ]
+                    RuntimeType::CLI->value,
+                ],
             );
 
         $this->controller->check($request);
@@ -103,13 +103,13 @@ class CheckControllerTest extends TestCase
             ->method('execute')
             ->with([
                 RuntimeType::CLI->value,
-                RuntimeType::WORKER->value
+                RuntimeType::WORKER->value,
             ]);
         $request = $this->createMock(Request::class);
         $request->method('get')
             ->with('skip')
             ->willReturn(
-                RuntimeType::CLI->value . ',' . RuntimeType::WORKER->value
+                RuntimeType::CLI->value . ',' . RuntimeType::WORKER->value,
             );
 
         $this->controller->check($request);
@@ -128,7 +128,7 @@ class CheckControllerTest extends TestCase
         $request->method('get')
             ->with('skip')
             ->willReturn(
-                true
+                true,
             );
 
         $this->controller->check($request);

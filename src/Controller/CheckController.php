@@ -18,8 +18,7 @@ final class CheckController extends AbstractController
 {
     public function __construct(
         private readonly RuntimeCheck $runtimeCheck,
-    ) {
-    }
+    ) {}
 
     /**
      * @throws JsonException
@@ -28,9 +27,9 @@ final class CheckController extends AbstractController
     #[IsGranted(
         attribute: new Expression(
             'is_granted("ROLE_SYSTEM_AUDITOR") '
-            . 'or "127.0.0.1" == subject.getClientIp()'
+            . 'or "127.0.0.1" == subject.getClientIp()',
         ),
-        subject: new Expression('request')
+        subject: new Expression('request'),
     )]
     public function check(Request $request): Response
     {

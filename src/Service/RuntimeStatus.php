@@ -30,7 +30,7 @@ class RuntimeStatus
             function (string $type) {
                 return RuntimeType::from($type);
             },
-            array_keys($this->status)
+            array_keys($this->status),
         );
     }
 

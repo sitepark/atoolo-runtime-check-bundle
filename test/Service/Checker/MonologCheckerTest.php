@@ -20,7 +20,7 @@ use Symfony\Component\Filesystem\Filesystem;
 class MonologCheckerTest extends TestCase
 {
     private string $resourceDir = __DIR__
-       . '/../../resources/Service/Checker/MonologCheckerTest';
+        . '/../../resources/Service/Checker/MonologCheckerTest';
 
     private string $testDir = __DIR__
         . '/../../../var/test/MonologCheckerTest';
@@ -46,12 +46,12 @@ class MonologCheckerTest extends TestCase
         $expected = CheckStatus::createFailure();
         $expected->addMessage(
             'logging',
-            'unknown: unsupported logger ' . get_class($logger)
+            'unknown: unsupported logger ' . get_class($logger),
         );
         $this->assertEquals(
             $expected,
             $status,
-            'Status is not as expected'
+            'Status is not as expected',
         );
     }
 
@@ -67,12 +67,12 @@ class MonologCheckerTest extends TestCase
         $expected = CheckStatus::createFailure();
         $expected->addMessage(
             'logging',
-            'unknown: no stream handler found'
+            'unknown: no stream handler found',
         );
         $this->assertEquals(
             $expected,
             $status,
-            'Status is not as expected'
+            'Status is not as expected',
         );
     }
 
@@ -90,25 +90,25 @@ class MonologCheckerTest extends TestCase
         $expected = CheckStatus::createFailure();
         $expected->addMessage(
             'logging',
-            'logfile not set'
+            'logfile not set',
         );
         $expected = CheckStatus::createFailure();
         $expected->addReport('logging', [
             'handler' => [
                 [
                     'logfile' => null,
-                    'level' => 'WARNING'
-                ]
-            ]
+                    'level' => 'WARNING',
+                ],
+            ],
         ]);
         $expected->addMessage(
             'logging',
-            'logfile not set'
+            'logfile not set',
         );
         $this->assertEquals(
             $expected,
             $status,
-            'Status is not as expected'
+            'Status is not as expected',
         );
     }
 
@@ -135,23 +135,23 @@ class MonologCheckerTest extends TestCase
             $expected = CheckStatus::createFailure();
             $expected->addReport('logging', [
                 'handler' => [
-                     [
+                    [
                         'logfile' => $file,
                         'level' => 'WARNING',
                         'logfile-size' => 0,
                         'logdir-size' => 0,
-                        'logfile-rotations' => 0
-                     ]
-                ]
+                        'logfile-rotations' => 0,
+                    ],
+                ],
             ]);
             $expected->addMessage(
                 'logging',
-                'logfile not writable: ' . $file
+                'logfile not writable: ' . $file,
             );
             $this->assertEquals(
                 $expected,
                 $status,
-                'Status is not as expected'
+                'Status is not as expected',
             );
         } finally {
             $filesystem->chmod($file, 0666);
@@ -181,18 +181,18 @@ class MonologCheckerTest extends TestCase
                 'handler' => [
                     [
                         'logfile' => $file,
-                        'level' => 'WARNING'
-                    ]
-                ]
+                        'level' => 'WARNING',
+                    ],
+                ],
             ]);
             $expected->addMessage(
                 'logging',
-                'log directory cannot be created: ' . dirname($file)
+                'log directory cannot be created: ' . dirname($file),
             );
             $this->assertEquals(
                 $expected,
                 $status,
-                'Status is not as expected'
+                'Status is not as expected',
             );
         } finally {
             $filesystem->chmod($dir, 0777);
@@ -223,18 +223,18 @@ class MonologCheckerTest extends TestCase
                 'handler' => [
                     [
                         'logfile' => $file,
-                        'level' => 'WARNING'
-                    ]
-                ]
+                        'level' => 'WARNING',
+                    ],
+                ],
             ]);
             $expected->addMessage(
                 'logging',
-                'logfile cannot be created: ' . $file
+                'logfile cannot be created: ' . $file,
             );
             $this->assertEquals(
                 $expected,
                 $status,
-                'Status is not as expected'
+                'Status is not as expected',
             );
         } finally {
             $filesystem->chmod($dir, 0777);
@@ -262,14 +262,14 @@ class MonologCheckerTest extends TestCase
                     'level' => 'WARNING',
                     'logfile-size' => 18,
                     'logdir-size' => 70,
-                    'logfile-rotations' => 4
-                ]
-            ]
+                    'logfile-rotations' => 4,
+                ],
+            ],
         ]);
         $this->assertEquals(
             $expected,
             $status,
-            'Status is not as expected'
+            'Status is not as expected',
         );
     }
 
@@ -283,7 +283,7 @@ class MonologCheckerTest extends TestCase
         $handler->method('getLevel')->willReturn(Level::Warning);
 
         $fingersCrossedHandler = $this->createStub(
-            FingersCrossedHandler::class
+            FingersCrossedHandler::class,
         );
         $fingersCrossedHandler->method('getHandler')
             ->willReturn($handler);
@@ -302,14 +302,14 @@ class MonologCheckerTest extends TestCase
                     'level' => 'WARNING',
                     'logfile-size' => 18,
                     'logdir-size' => 70,
-                    'logfile-rotations' => 4
-                ]
-            ]
+                    'logfile-rotations' => 4,
+                ],
+            ],
         ]);
         $this->assertEquals(
             $expected,
             $status,
-            'Status is not as expected'
+            'Status is not as expected',
         );
     }
 
@@ -333,22 +333,22 @@ class MonologCheckerTest extends TestCase
                     'level' => 'WARNING',
                     'logfile-size' => 18,
                     'logdir-size' => 70,
-                    'logfile-rotations' => 4
-                ]
-            ]
+                    'logfile-rotations' => 4,
+                ],
+            ],
         ]);
         $expected->addMessages(
             'logging',
             [
                 'logfile size exceeds 10 bytes',
                 'logdir size exceeds 20 bytes',
-                'logfile rotations exceed 1'
-            ]
+                'logfile rotations exceed 1',
+            ],
         );
         $this->assertEquals(
             $expected,
             $status,
-            'Status is not as expected'
+            'Status is not as expected',
         );
     }
 }

@@ -23,7 +23,7 @@ class FastCgiStatusFactory
         private readonly array $possibleSocketFilePatterns,
         private readonly string $frontControllerPath,
         ?string $resourceRoot,
-        ?string $resourceHost
+        ?string $resourceHost,
     ) {
         if (empty($resourceRoot)) {
             throw new RuntimeException(
@@ -31,12 +31,12 @@ class FastCgiStatusFactory
                 The resource-root could not be determined.
                 This is the case if the console command was not
                 called via the resource-root path
-                EOF
+                EOF,
             );
         }
         if (empty($resourceHost)) {
             throw new RuntimeException(
-                'resource host not set'
+                'resource host not set',
             );
         }
 
@@ -55,7 +55,7 @@ class FastCgiStatusFactory
             $connection,
             $this->frontControllerPath,
             $this->resourceRoot,
-            $this->resourceHost
+            $this->resourceHost,
         );
     }
 
@@ -77,7 +77,7 @@ class FastCgiStatusFactory
     }
 
     private function createConnection(
-        string $socket
+        string $socket,
     ): ConfiguresSocketConnection {
         $last = strrpos($socket, ':');
         if ($last !== false) {
@@ -86,16 +86,16 @@ class FastCgiStatusFactory
 
             return new NetworkSocket(
                 $host,
-                (int)$port,
+                (int) $port,
                 5000,     # Connect timeout in milliseconds (default: 5000)
-                120000    # Read/write timeout in milliseconds (default: 5000)
+                120000,    # Read/write timeout in milliseconds (default: 5000)
             );
         }
 
         return new UnixDomainSocket(
             $socket,
             5000,   # Connect timeout in milliseconds (default: 5000)
-            120000  # Read/write timeout in milliseconds (default: 5000)
+            120000,  # Read/write timeout in milliseconds (default: 5000)
         );
     }
 }

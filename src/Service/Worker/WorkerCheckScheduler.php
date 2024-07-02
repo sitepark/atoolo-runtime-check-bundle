@@ -25,10 +25,9 @@ class WorkerCheckScheduler implements ScheduleProviderInterface
         private readonly CheckerCollection $checkerCollection,
         private readonly string $host,
         private readonly LockFactory $lockFactory = new LockFactory(
-            new SemaphoreStore()
+            new SemaphoreStore(),
         ),
-    ) {
-    }
+    ) {}
 
     public function getSchedule(): Schedule
     {
@@ -36,14 +35,14 @@ class WorkerCheckScheduler implements ScheduleProviderInterface
             ->add(
                 RecurringMessage::trigger(
                     new OneTimeTrigger(),
-                    new WorkerCheckEvent()
+                    new WorkerCheckEvent(),
                 ),
                 RecurringMessage::every(
                     $this->workerStatusFile->updatePeriodInMinutes . ' minutes',
-                    new WorkerCheckEvent()
+                    new WorkerCheckEvent(),
                 ),
             )->lock($this->lockFactory->createLock(
-                'runtime-check-scheduler-' . $this->host
+                'runtime-check-scheduler-' . $this->host,
             ));
     }
 

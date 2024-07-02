@@ -25,14 +25,14 @@ class WorkerCheckSchedulerTest extends TestCase
             $workerStatusFile,
             $checkerCollection,
             'www',
-            $lockFactory
+            $lockFactory,
         );
 
         $schedule = $workerCheckScheduler->getSchedule();
 
         $this->assertEquals(
             2,
-            count($schedule->getRecurringMessages())
+            count($schedule->getRecurringMessages()),
         );
     }
 
@@ -49,7 +49,7 @@ class WorkerCheckSchedulerTest extends TestCase
             $workerStatusFile,
             $checkerCollection,
             'www',
-            $lockFactory
+            $lockFactory,
         );
 
 

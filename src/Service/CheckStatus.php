@@ -19,9 +19,7 @@ class CheckStatus
      */
     private array $reports = [];
 
-    public function __construct(public bool $success)
-    {
-    }
+    public function __construct(public bool $success) {}
 
     public static function createSuccess(): self
     {
@@ -45,7 +43,7 @@ class CheckStatus
     {
         $this->messages[$scope] = array_merge(
             $this->messages[$scope] ?? [],
-            $messages
+            $messages,
         );
         return $this;
     }
@@ -100,7 +98,7 @@ class CheckStatus
         $this->success = $this->success && $status->success;
         $this->messages = array_merge_recursive(
             $this->messages,
-            $status->messages
+            $status->messages,
         );
         foreach ($status->reports as $scope => $result) {
             $this->addReport($scope, $result);
@@ -115,7 +113,7 @@ class CheckStatus
     {
         $data = [
             'success' => $this->success,
-            'reports' => $this->reports
+            'reports' => $this->reports,
         ];
         if (!empty($this->messages)) {
             $data['messages'] = $this->messages;
@@ -136,10 +134,10 @@ class CheckStatus
                     'deserialize' => [
                         json_encode(
                             $data,
-                            JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES
-                        )
-                    ]
-                ]
+                            JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES,
+                        ),
+                    ],
+                ],
             ];
         }
         $success = is_bool($data['success']) && $data['success'];

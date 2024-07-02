@@ -29,10 +29,10 @@ class CheckStatusTest extends TestCase
         $status->addMessage('scope', 'message');
         self::assertSame(
             [
-                'scope' => ['message']
+                'scope' => ['message'],
             ],
             $status->getMessages(),
-            'Message was not added correctly'
+            'Message was not added correctly',
         );
     }
 
@@ -42,10 +42,10 @@ class CheckStatusTest extends TestCase
         $status->addReport('scope', ['result']);
         self::assertSame(
             [
-                'scope' => ['result']
+                'scope' => ['result'],
             ],
             $status->getReports(),
-            'Result was not added correctly'
+            'Result was not added correctly',
         );
     }
 
@@ -56,10 +56,10 @@ class CheckStatusTest extends TestCase
         $status->replaceReport('scope', ['result2']);
         self::assertSame(
             [
-                'scope' => ['result2']
+                'scope' => ['result2'],
             ],
             $status->getReports(),
-            'Result was not replaced'
+            'Result was not replaced',
         );
     }
 
@@ -70,7 +70,7 @@ class CheckStatusTest extends TestCase
         self::assertSame(
             ['result'],
             $status->getReport('scope'),
-            'unexpected result'
+            'unexpected result',
         );
     }
 
@@ -80,7 +80,7 @@ class CheckStatusTest extends TestCase
         self::assertSame(
             [],
             $status->getReport('scope'),
-            'unexpected result'
+            'unexpected result',
         );
     }
 
@@ -105,7 +105,7 @@ class CheckStatusTest extends TestCase
         self::assertEquals(
             $expected,
             $status,
-            'Status was not applied correctly'
+            'Status was not applied correctly',
         );
     }
 
@@ -120,15 +120,15 @@ class CheckStatusTest extends TestCase
                 'success' => true,
                 'reports' => [
                     'scope' => [
-                        'a' => 'b'
+                        'a' => 'b',
                     ],
                 ],
                 'messages' => [
-                    'scope' => ['message']
+                    'scope' => ['message'],
                 ],
             ],
             $serialized,
-            'Status was not serialized correctly'
+            'Status was not serialized correctly',
         );
     }
 
@@ -138,11 +138,11 @@ class CheckStatusTest extends TestCase
             'success' => true,
             'reports' => [
                 'scope' => [
-                    'a' => 'b'
+                    'a' => 'b',
                 ],
             ],
             'messages' => [
-                'scope' => ['message']
+                'scope' => ['message'],
             ],
         ];
         $status = CheckStatus::deserialize($serialized);
@@ -153,7 +153,7 @@ class CheckStatusTest extends TestCase
         self::assertEquals(
             $expected,
             $status,
-            'Status was not deserialized correctly'
+            'Status was not deserialized correctly',
         );
     }
 
@@ -164,20 +164,20 @@ class CheckStatusTest extends TestCase
     {
         $serialized = [
             'code' => 401,
-            'message' => "JWT Token not found"
+            'message' => "JWT Token not found",
         ];
         $status = CheckStatus::deserialize($serialized);
 
         $expected = new CheckStatus(false);
         $expected->addMessage(
             'deserialize',
-            json_encode($serialized, JSON_THROW_ON_ERROR)
+            json_encode($serialized, JSON_THROW_ON_ERROR),
         );
 
         self::assertEquals(
             $expected,
             $status,
-            'Status was not deserialized correctly'
+            'Status was not deserialized correctly',
         );
     }
 }

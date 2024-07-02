@@ -7,6 +7,4 @@ namespace Atoolo\Runtime\Check\Service\Worker;
 /**
  * @codeCoverageIgnore
  */
-class WorkerCheckEvent
-{
-}
+class WorkerCheckEvent {}

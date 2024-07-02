@@ -13,7 +13,7 @@ use RuntimeException;
 class FastCgiStatusFactoryTest extends TestCase
 {
     private string $resourceDir = __DIR__
-    . '/../../resources/Service/Cli/FastCgiStatusFactoryTest';
+        . '/../../resources/Service/Cli/FastCgiStatusFactoryTest';
 
     public function testCreateWithDefaultSocket(): void
     {
@@ -21,14 +21,14 @@ class FastCgiStatusFactoryTest extends TestCase
             possibleSocketFilePatterns: [],
             frontControllerPath: 'test',
             resourceRoot: 'test',
-            resourceHost: 'test'
+            resourceHost: 'test',
         );
         $status = $factory->create();
 
         $this->assertEquals(
             '127.0.0.1:9000',
             $status->getSocket(),
-            'Unexpected socket'
+            'Unexpected socket',
         );
     }
 
@@ -38,14 +38,14 @@ class FastCgiStatusFactoryTest extends TestCase
             possibleSocketFilePatterns: [],
             frontControllerPath: 'test',
             resourceRoot: 'test',
-            resourceHost: 'test'
+            resourceHost: 'test',
         );
         $status = $factory->create('1.2.3.4:9000');
 
         $this->assertEquals(
             '1.2.3.4:9000',
             $status->getSocket(),
-            'Unexpected socket'
+            'Unexpected socket',
         );
     }
 
@@ -53,11 +53,11 @@ class FastCgiStatusFactoryTest extends TestCase
     {
         $factory = new FastCgiStatusFactory(
             possibleSocketFilePatterns: [
-                $this->resourceDir . '/unix-*'
+                $this->resourceDir . '/unix-*',
             ],
             frontControllerPath: 'test',
             resourceRoot: 'test',
-            resourceHost: 'test'
+            resourceHost: 'test',
         );
 
         $status = $factory->create();
@@ -65,7 +65,7 @@ class FastCgiStatusFactoryTest extends TestCase
         $this->assertEquals(
             $this->resourceDir . '/unix-socket',
             $status->getSocket(),
-            'Unexpected socket'
+            'Unexpected socket',
         );
     }
 
@@ -76,7 +76,7 @@ class FastCgiStatusFactoryTest extends TestCase
             possibleSocketFilePatterns: [],
             frontControllerPath: 'test',
             resourceRoot: null,
-            resourceHost: 'test'
+            resourceHost: 'test',
         );
     }
 
@@ -87,7 +87,7 @@ class FastCgiStatusFactoryTest extends TestCase
             possibleSocketFilePatterns: [],
             frontControllerPath: 'test',
             resourceRoot: 'test',
-            resourceHost: null
+            resourceHost: null,
         );
     }
 }

@@ -45,7 +45,7 @@ class WorkerStatusFileTest extends TestCase
     public function testRead(): void
     {
         $date = new DateTime(
-            '2024-06-10 13:31:00'
+            '2024-06-10 13:31:00',
         );
         $platform = $this->createStub(Platform::class);
         $platform->method('time')
@@ -54,26 +54,26 @@ class WorkerStatusFileTest extends TestCase
         $statusFile = new WorkerStatusFile(
             $this->resourceDir . '/statusFile.json',
             10,
-            $platform
+            $platform,
         );
         $status = $statusFile->read();
 
         $expected = CheckStatus::createSuccess();
         $expected->addReport('scheduler', [
-            'last-run' => '10.06.2024 13:16:00'
+            'last-run' => '10.06.2024 13:16:00',
         ]);
 
         $this->assertEquals(
             $expected,
             $status,
-            'Unexpected status'
+            'Unexpected status',
         );
     }
 
     public function testReadWithEmptyStatusFile(): void
     {
         $date = new DateTime(
-            '2024-06-10 13:31:00'
+            '2024-06-10 13:31:00',
         );
         $platform = $this->createStub(Platform::class);
         $platform->method('time')
@@ -82,7 +82,7 @@ class WorkerStatusFileTest extends TestCase
         $statusFile = new WorkerStatusFile(
             $this->resourceDir . '/empty-statusFile.json',
             10,
-            $platform
+            $platform,
         );
         $status = $statusFile->read();
 
@@ -90,13 +90,13 @@ class WorkerStatusFileTest extends TestCase
         $expected->addMessage(
             'scheduler',
             'The worker did not run in the last 10 minutes.'
-            . ' Last run: unknown'
+            . ' Last run: unknown',
         );
 
         $this->assertEquals(
             $expected,
             $status,
-            'Unexpected status'
+            'Unexpected status',
         );
     }
     public function testReadFileNotExists(): void
@@ -113,7 +113,7 @@ class WorkerStatusFileTest extends TestCase
         $this->assertEquals(
             $expected,
             $status,
-            'Unexpected status'
+            'Unexpected status',
         );
     }
 
@@ -139,7 +139,7 @@ class WorkerStatusFileTest extends TestCase
     public function testReadFileLastRunExpired(): void
     {
         $date = new DateTime(
-            '2024-06-10 13:32:00'
+            '2024-06-10 13:32:00',
         );
         $platform = $this->createStub(Platform::class);
         $platform->method('time')
@@ -148,31 +148,31 @@ class WorkerStatusFileTest extends TestCase
         $statusFile = new WorkerStatusFile(
             $this->resourceDir . '/statusFile.json',
             10,
-            $platform
+            $platform,
         );
         $status = $statusFile->read();
 
         $expected = CheckStatus::createFailure();
         $expected->addReport('scheduler', [
-            'last-run' => '10.06.2024 13:16:00'
+            'last-run' => '10.06.2024 13:16:00',
         ]);
         $expected->addMessage(
             'scheduler',
             'The worker did not run in the last 10 minutes.'
-                . ' Last run: 10.06.2024 13:16:00'
+                . ' Last run: 10.06.2024 13:16:00',
         );
 
         $this->assertEquals(
             $expected,
             $status,
-            'Unexpected status'
+            'Unexpected status',
         );
     }
 
     public function testReadWithInvalidLastRun(): void
     {
         $date = new DateTime(
-            '2024-06-10 13:16:00'
+            '2024-06-10 13:16:00',
         );
         $platform = $this->createStub(Platform::class);
         $platform->method('time')
@@ -181,24 +181,24 @@ class WorkerStatusFileTest extends TestCase
         $statusFile = new WorkerStatusFile(
             $this->resourceDir . '/statusFileWithInvalidLastRun.json',
             10,
-            $platform
+            $platform,
         );
         $status = $statusFile->read();
 
         $expected = CheckStatus::createFailure();
         $expected->addReport('scheduler', [
-            'last-run' => 123
+            'last-run' => 123,
         ]);
         $expected->addMessage(
             'scheduler',
             'The worker did not run in the last 10 minutes.'
-            . ' Last run: 123'
+            . ' Last run: 123',
         );
 
         $this->assertEquals(
             $expected,
             $status,
-            'Unexpected status'
+            'Unexpected status',
         );
     }
 
@@ -210,7 +210,7 @@ class WorkerStatusFileTest extends TestCase
     {
 
         $date = new DateTime(
-            '2024-06-10 13:32:00'
+            '2024-06-10 13:32:00',
         );
         $platform = $this->createStub(Platform::class);
         $platform->method('time')
@@ -220,12 +220,12 @@ class WorkerStatusFileTest extends TestCase
         $statusFile = new WorkerStatusFile(
             $file,
             10,
-            $platform
+            $platform,
         );
 
         $checkStatus = CheckStatus::createSuccess();
         $checkStatus->addReport('test', [
-            'a' => 'b'
+            'a' => 'b',
         ]);
 
         try {
@@ -243,7 +243,7 @@ class WorkerStatusFileTest extends TestCase
             file_get_contents($file),
             true,
             512,
-            JSON_THROW_ON_ERROR
+            JSON_THROW_ON_ERROR,
         );
 
         $this->assertEquals(
@@ -251,19 +251,19 @@ class WorkerStatusFileTest extends TestCase
                 'success' => true,
                 'reports' => [
                     'test' => [
-                        'a' => 'b'
+                        'a' => 'b',
                     ],
                     'supervisor' => [
                         'group' => 'worker',
-                        'process' => 'worker_01'
+                        'process' => 'worker_01',
                     ],
                     'scheduler' => [
-                        'last-run' => '10.06.2024 13:32:00'
+                        'last-run' => '10.06.2024 13:32:00',
                     ],
-                ]
+                ],
             ],
             $writtenData,
-            'Unexpected status'
+            'Unexpected status',
         );
     }
 }

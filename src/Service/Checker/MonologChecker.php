@@ -28,9 +28,8 @@ class MonologChecker implements Checker
         private readonly string $maxLogFileSize,
         private readonly string $maxLogDirSize,
         private readonly int $maxLogFileRotations,
-        private readonly LoggerInterface $logger
-    ) {
-    }
+        private readonly LoggerInterface $logger,
+    ) {}
 
     public function getScope(): string
     {
@@ -43,7 +42,7 @@ class MonologChecker implements Checker
             $status = CheckStatus::createFailure();
             $status->addMessage(
                 $this->getScope(),
-                'unknown: unsupported logger ' . get_class($this->logger)
+                'unknown: unsupported logger ' . get_class($this->logger),
             );
             return $status;
         }
@@ -53,7 +52,7 @@ class MonologChecker implements Checker
             $status = CheckStatus::createFailure();
             $status->addMessage(
                 $this->getScope(),
-                'unknown: no stream handler found'
+                'unknown: no stream handler found',
             );
             return $status;
         }
@@ -67,7 +66,7 @@ class MonologChecker implements Checker
 
     private function checkHandler(
         CheckStatus $mergedStatus,
-        StreamHandler $handler
+        StreamHandler $handler,
     ): CheckStatus {
 
         $reportData = $this->getReportData($handler);
@@ -85,13 +84,13 @@ class MonologChecker implements Checker
             return $this->createFailure(
                 $mergedStatus,
                 $reportData,
-                $errors
+                $errors,
             );
         }
 
         return $this->createSuccess(
             $mergedStatus,
-            $reportData
+            $reportData,
         );
     }
 
@@ -116,7 +115,7 @@ class MonologChecker implements Checker
         $reportData['logfile-size'] = $fileSize;
 
         $iterator = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator($dir)
+            new RecursiveDirectoryIterator($dir),
         );
 
         $dirSize = 0;
@@ -147,7 +146,7 @@ class MonologChecker implements Checker
             $dir = dirname($file);
             if (!is_dir($dir)) {
                 if (!@mkdir($dir, 0777, true) && !is_dir($dir)) {
-                        return 'log directory cannot be created: ' . $dir;
+                    return 'log directory cannot be created: ' . $dir;
                 }
             }
 
@@ -207,7 +206,7 @@ class MonologChecker implements Checker
     private function createFailure(
         CheckStatus $mergedStatus,
         array $reportData,
-        array $messages
+        array $messages,
     ): CheckStatus {
         $status = $mergedStatus->apply(CheckStatus::createFailure());
         $status->addMessages($this->getScope(), $messages);
@@ -230,7 +229,7 @@ class MonologChecker implements Checker
      */
     private function applyStatusReport(
         CheckStatus $status,
-        array $reportData
+        array $reportData,
     ): CheckStatus {
         /**
          * @var array{
@@ -248,7 +247,7 @@ class MonologChecker implements Checker
      * @return array<StreamHandler>
      */
     private function getStreamHandlers(
-        Logger $logger
+        Logger $logger,
     ): array {
         $handlers = [];
         foreach ($logger->getHandlers() as $handler) {
@@ -266,7 +265,7 @@ class MonologChecker implements Checker
     {
         [$number, $suffix] = sscanf($memory, '%u%c') ?? [null, null];
         if (!is_string($suffix)) {
-            return (int)$memory;
+            return (int) $memory;
         }
 
         $pos = stripos(' KMG', $suffix);

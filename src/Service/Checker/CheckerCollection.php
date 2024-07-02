@@ -12,9 +12,8 @@ class CheckerCollection
      * @param iterable<Checker> $checkers
      */
     public function __construct(
-        private readonly iterable $checkers
-    ) {
-    }
+        private readonly iterable $checkers,
+    ) {}
 
     /**
      * @param array<string> $scopesToSkip
