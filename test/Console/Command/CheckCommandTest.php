@@ -18,7 +18,7 @@ class CheckCommandTest extends TestCase
 {
     private CommandTester $commandTester;
 
-    private RuntimeCheck $untimeCheck;
+    private RuntimeCheck $runtimeCheck;
 
     public function setUp(): void
     {

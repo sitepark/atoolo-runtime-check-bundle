@@ -21,6 +21,8 @@ class CheckControllerTest extends TestCase
 {
     private RuntimeCheck&MockObject $runtimeCheck;
 
+    private CheckController $controller;
+
     /**
      * @throws Exception
      */
