@@ -95,6 +95,29 @@ class FastCGIStatusTest extends TestCase
             'Unexpected CheckStatus',
         );
     }
+
+    public function testRequestWithFpmError(): void
+    {
+        $this->response->method('getError')
+            ->willReturn('FPM Error');
+        $this->client->method('sendRequest')
+            ->willReturn($this->response);
+
+        $status = $this->fastCGIStatus->request([]);
+
+        $expected = CheckStatus::createFailure();
+        $expected->addMessage(
+            'fpm-fcgi',
+            "FPM Error output:\nFPM Error",
+        );
+
+        $this->assertEquals(
+            $expected,
+            $status,
+            'Unexpected CheckStatus',
+        );
+    }
+
     public function testRequestWithInvalidJson(): void
     {
         $this->response->method('getBody')

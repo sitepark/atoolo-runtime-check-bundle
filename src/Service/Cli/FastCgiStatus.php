@@ -71,6 +71,17 @@ class FastCgiStatus
                 $request,
             );
 
+            if (!empty($res->getError())) {
+                return CheckStatus::createFailure()
+                    ->addMessage(
+                        'fpm-fcgi',
+                        sprintf(
+                            "FPM Error output:\n%s",
+                            $res->getError(),
+                        ),
+                    );
+            }
+
             $body = $res->getBody();
             try {
                 /** @var RuntimeStatusData $data */
