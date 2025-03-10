@@ -22,8 +22,12 @@ services:
       - [
         '/var/run/php-fpm.sock',
         '/var/run/php/php-fpm.sock',
+        '/run/php-fpm/php-fpm.sock',
+        '/var/run/php-fpm/php-fpm.sock',
         '/var/run/php*.sock',
-        '/var/run/php/*.sock'
+        '/var/run/php/*.sock',
+        '/run/php-fpm/*.sock',
+        '/var/run/php-fpm/*.sock'
       ]
       - '%kernel.project_dir%/public/index.php'
       - '%atoolo_resource.resource_root%'
