@@ -33,8 +33,6 @@ services:
       - '%atoolo_resource.resource_root%'
       - '%atoolo_resource.resource_host%'
 
-  Atoolo\Runtime\Check\Service\ProcessStatus: ~
-
   Atoolo\Runtime\Check\Service\Checker\PhpStatus:
     tags:
       - { name: 'atoolo_runtime_check.checker' }
