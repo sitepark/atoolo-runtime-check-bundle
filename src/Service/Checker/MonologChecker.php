@@ -128,8 +128,8 @@ class MonologChecker implements Checker
         }
         $reportData['logdir-size'] = $dirSize;
 
-        $rotations =
-            count(glob($file . '.*.gz') ?: [])
+        $rotations
+            = count(glob($file . '.*.gz') ?: [])
             + count(glob($file . '.[0-9]') ?: []);
         $reportData['logfile-rotations'] = $rotations;
 

@@ -45,9 +45,9 @@ class WorkerStatusFile
             JSON_THROW_ON_ERROR,
         );
 
-        $allowedTime =
-            $this->platform->time() -
-            (($this->updatePeriodInMinutes + $toleranceInMinutes) * 60);
+        $allowedTime
+            = $this->platform->time()
+            - (($this->updatePeriodInMinutes + $toleranceInMinutes) * 60);
         $formattedLastRun = $result['reports']['scheduler']['last-run']
             ?? 'unknown';
         $lastRun = is_string($formattedLastRun)
