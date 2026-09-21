@@ -23,7 +23,8 @@ class TypifiedInput
         }
         if (!is_string($value)) {
             throw new InvalidArgumentException(
-                'option ' . $name . ' must be a string: ' . $value,
+                'option ' . $name . ' must be a string: '
+                . (is_scalar($value) ? (string) $value : get_debug_type($value)),
             );
         }
         return $value;
@@ -40,9 +41,11 @@ class TypifiedInput
         }
         if (!is_array($value)) {
             throw new InvalidArgumentException(
-                'option ' . $name . ' must be a array: ' . $value,
+                'option ' . $name . ' must be a array: '
+                . (is_scalar($value) ? (string) $value : get_debug_type($value)),
             );
         }
+        /** @var array<string> $value */
         return $value;
     }
 

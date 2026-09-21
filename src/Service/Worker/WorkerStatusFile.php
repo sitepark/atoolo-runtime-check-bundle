@@ -70,7 +70,9 @@ class WorkerStatusFile
                     'The worker did not run in the last '
                     . $this->updatePeriodInMinutes
                     . ' minutes. Last run: '
-                    . $formattedLastRun,
+                    . (is_scalar($formattedLastRun)
+                        ? (string) $formattedLastRun
+                        : get_debug_type($formattedLastRun)),
                 );
         }
 

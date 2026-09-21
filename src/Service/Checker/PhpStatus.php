@@ -58,19 +58,23 @@ class PhpStatus
     {
         $report = [
             'version' => $this->platform->getVersion(),
+            // @phpstan-ignore nullCoalesce.initializedProperty
             'ini' => $this->getIniSettings($this->config['ini'] ?? []),
         ];
 
         if ($this->sapi === 'fpm-fcgi') {
             $fpm = [];
             $fpm['config'] = $this->getFpmConfig(
+                // @phpstan-ignore nullCoalesce.initializedProperty
                 $this->config['fpm']['configDirs'] ?? [],
             );
             $fpm['status'] = $this->getFpmPoolStatus(
+                // @phpstan-ignore nullCoalesce.initializedProperty
                 $this->config['fpm']['status'] ?? [],
             );
             $report['fpm'] = $fpm;
             $report['opcache'] = $this->getOpcacheStatus(
+                // @phpstan-ignore nullCoalesce.initializedProperty
                 $this->config['opcache'] ?? [],
             );
         }

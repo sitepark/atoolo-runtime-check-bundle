@@ -40,6 +40,7 @@ final class CheckController extends AbstractController
             $skip = [];
         }
 
+        /** @var array<string> $skip */
         $runtimeStatus = $this->runtimeCheck->execute($skip);
 
         $result = $runtimeStatus->serialize();
