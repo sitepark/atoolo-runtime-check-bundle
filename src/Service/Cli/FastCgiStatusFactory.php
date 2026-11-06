@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Atoolo\Runtime\Check\Service\Cli;
 
+use Atoolo\Runtime\Check\Service\FpmFcgi\AccessToken;
 use hollodotme\FastCGI\Client;
 use hollodotme\FastCGI\Interfaces\ConfiguresSocketConnection;
 use hollodotme\FastCGI\SocketConnections\NetworkSocket;
@@ -24,6 +25,7 @@ class FastCgiStatusFactory
         private readonly string $frontControllerPath,
         ?string $resourceRoot,
         ?string $resourceHost,
+        private readonly AccessToken $accessToken,
     ) {
         if (empty($resourceRoot)) {
             throw new RuntimeException(
@@ -56,6 +58,7 @@ class FastCgiStatusFactory
             $this->frontControllerPath,
             $this->resourceRoot,
             $this->resourceHost,
+            $this->accessToken->create(),
         );
     }
 

@@ -6,9 +6,11 @@ namespace Atoolo\Runtime\Check\Test\Service\Cli;
 
 use Atoolo\Runtime\Check\Service\CheckStatus;
 use Atoolo\Runtime\Check\Service\Cli\FastCgiStatus;
+use Atoolo\Runtime\Check\Service\FpmFcgi\AccessToken;
 use Atoolo\Runtime\Check\Service\RuntimeType;
 use hollodotme\FastCGI\Client;
 use hollodotme\FastCGI\Interfaces\ConfiguresSocketConnection;
+use hollodotme\FastCGI\Interfaces\ProvidesRequestData;
 use hollodotme\FastCGI\Interfaces\ProvidesResponseData;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
@@ -37,7 +39,33 @@ class FastCGIStatusTest extends TestCase
             '/path/to/front-controller',
             '',
             '',
+            'test-token',
         );
+    }
+
+    public function testRequestSendsAccessToken(): void
+    {
+        $this->response->method('getBody')
+            ->willReturn(json_encode([
+                'success' => true,
+                RuntimeType::FPM_FCGI->value => [
+                    'success' => true,
+                    'reports' => [],
+                ],
+            ], JSON_THROW_ON_ERROR));
+        $this->client->expects($this->once())
+            ->method('sendRequest')
+            ->with(
+                $this->anything(),
+                $this->callback(
+                    static fn(ProvidesRequestData $request): bool
+                        => ($request->getCustomVars()[AccessToken::SERVER_VAR]
+                            ?? null) === 'test-token',
+                ),
+            )
+            ->willReturn($this->response);
+
+        $this->fastCGIStatus->request([]);
     }
 
     public function testRequest(): void
