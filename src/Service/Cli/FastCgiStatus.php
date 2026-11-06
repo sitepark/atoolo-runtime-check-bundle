@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Atoolo\Runtime\Check\Service\Cli;
 
 use Atoolo\Runtime\Check\Service\CheckStatus;
+use Atoolo\Runtime\Check\Service\FpmFcgi\AccessToken;
 use Atoolo\Runtime\Check\Service\RuntimeStatus;
 use Atoolo\Runtime\Check\Service\RuntimeType;
 use hollodotme\FastCGI\Client;
@@ -25,6 +26,7 @@ class FastCgiStatus
         private readonly string $frontControllerPath,
         private readonly string $resourceRoot,
         private readonly string $resourceHost,
+        private readonly string $accessToken,
     ) {}
 
     /**
@@ -58,6 +60,7 @@ class FastCgiStatus
         $request = new PostRequest($this->frontControllerPath, $content);
         $request->setRequestUri('/api/runtime-check');
         $request->setRemoteAddress('127.0.0.1');
+        $request->setCustomVar(AccessToken::SERVER_VAR, $this->accessToken);
         $request->setServerName($this->resourceHost);
         $request->setCustomVar('RESOURCE_ROOT', $this->resourceRoot);
         $request->setCustomVar(

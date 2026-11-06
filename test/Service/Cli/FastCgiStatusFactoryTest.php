@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Atoolo\Runtime\Check\Test\Service\Cli;
 
 use Atoolo\Runtime\Check\Service\Cli\FastCgiStatusFactory;
+use Atoolo\Runtime\Check\Service\FpmFcgi\AccessToken;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
@@ -22,6 +23,7 @@ class FastCgiStatusFactoryTest extends TestCase
             frontControllerPath: 'test',
             resourceRoot: 'test',
             resourceHost: 'test',
+            accessToken: new AccessToken('secret'),
         );
         $status = $factory->create();
 
@@ -39,6 +41,7 @@ class FastCgiStatusFactoryTest extends TestCase
             frontControllerPath: 'test',
             resourceRoot: 'test',
             resourceHost: 'test',
+            accessToken: new AccessToken('secret'),
         );
         $status = $factory->create('1.2.3.4:9000');
 
@@ -58,6 +61,7 @@ class FastCgiStatusFactoryTest extends TestCase
             frontControllerPath: 'test',
             resourceRoot: 'test',
             resourceHost: 'test',
+            accessToken: new AccessToken('secret'),
         );
 
         $status = $factory->create();
@@ -77,6 +81,7 @@ class FastCgiStatusFactoryTest extends TestCase
             frontControllerPath: 'test',
             resourceRoot: null,
             resourceHost: 'test',
+            accessToken: new AccessToken('secret'),
         );
     }
 
@@ -88,6 +93,7 @@ class FastCgiStatusFactoryTest extends TestCase
             frontControllerPath: 'test',
             resourceRoot: 'test',
             resourceHost: null,
+            accessToken: new AccessToken('secret'),
         );
     }
 }

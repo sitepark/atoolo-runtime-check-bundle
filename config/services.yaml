@@ -32,6 +32,11 @@ services:
       - '%kernel.project_dir%/public/index.php'
       - '%atoolo_resource.resource_root%'
       - '%atoolo_resource.resource_host%'
+      - '@Atoolo\Runtime\Check\Service\FpmFcgi\AccessToken'
+
+  Atoolo\Runtime\Check\Service\FpmFcgi\AccessToken:
+    arguments:
+      - '%kernel.secret%'
 
   Atoolo\Runtime\Check\Service\Checker\PhpStatus:
     tags:
@@ -91,3 +96,5 @@ services:
   Atoolo\Runtime\Check\Controller\CheckController:
     arguments:
       - '@Atoolo\Runtime\Check\Service\FpmFcgi\RuntimeCheck'
+      - '@security.authorization_checker'
+      - '@Atoolo\Runtime\Check\Service\FpmFcgi\AccessToken'
